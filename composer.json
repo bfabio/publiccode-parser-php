@@ -1,0 +1,19 @@
+{
+    "name": "bfabio/publiccode-parser-php",
+    "description": "Parse and validate publiccode.yml files",
+    "type": "library",
+    "license": "BSD-3-Clause",
+    "keywords": ["publiccode.yml", "parser", "public-administration"],
+    "homepage": "https://github.com/bfabio/publiccode-parser-php",
+    "authors": [
+        {
+            "name": "Fabio Bonelli",
+            "email": "fb@fabiobonelli.it"
+        }
+    ],
+    "require": {
+        "php": "^7.4 || ^8.0",
+        "ext-json": "*",
+        "ext-ffi": "*"
+    }
+}
