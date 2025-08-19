@@ -1,0 +1,195 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Bfabio\PublicCodeParser;
+
+use FFI;
+use Bfabio\PublicCodeParser\Exception\ParserException;
+use Bfabio\PublicCodeParser\Exception\ValidationException;
+
+class Parser
+{
+    private ParserOptions $options;
+    private FFI $ffi;
+    private static ?FFI $ffiInstance = null;
+
+    public function __construct(?ParserOptions $options = null)
+    {
+        $this->options = $options ?? new ParserOptions();
+        $this->ffi = $this->getFFI();
+    }
+
+    /**
+     * Parse publiccode.yml content
+     *
+     * @param string $content YAML content
+     * @return PublicCode
+     * @throws ParserException
+     * @throws ValidationException
+     */
+    public function parse(string $content): PublicCode
+    {
+        $result = $this->ffi->ParseString($content);
+
+        if ($result === null) {
+            throw new ParserException('Failed to parse publiccode.yml content');
+        }
+
+        return $this->processResult($result);
+    }
+
+    /**
+     * Parse publiccode.yml file
+     *
+     * @param string $filePath Path to publiccode.yml
+     * @return PublicCode
+     * @throws ParserException
+     * @throws ValidationException
+     */
+    public function parseFile(string $filePath): PublicCode
+    {
+        if (!file_exists($filePath)) {
+            throw new ParserException("File not found: {$filePath}");
+        }
+
+        $options = FFI::new('struct ParseOptions');
+        $options->DisableNetwork = $this->options->isDisableNetwork();
+
+        $result = $this->ffi->ParseFile($filePath, FFI::addr($options));
+
+        if ($result === null) {
+            throw new ParserException('Failed to parse publiccode.yml file');
+        }
+
+        return $this->processResult($result);
+    }
+
+    /**
+     * Validate publiccode.yml file without parsing
+     *
+     * @param string $filePath
+     * @return bool
+     */
+    public function validate(string $filePath): bool
+    {
+        try {
+            $this->parseFile($filePath);
+            return true;
+        } catch (ParserException | ValidationException $e) {
+            return false;
+        }
+    }
+
+    /**
+     * Get or create FFI instance
+     *
+     * @return FFI
+     * @throws ParserException
+     */
+    private function getFFI(): FFI
+    {
+        if (self::$ffiInstance !== null) {
+            return self::$ffiInstance;
+        }
+
+        $libraryPath = $this->findLibrary();
+
+        $cdef = <<<'CDEF'
+        typedef struct {
+            bool DisableNetwork;
+            char *Branch;
+            char *BaseURL;
+        } ParseOptions;
+
+        typedef struct {
+            char* Data;
+            char* Error;
+            int ErrorCount;
+            char** Errors;
+        } ParseResult;
+
+        ParseResult* ParseFile(const char* filepath, ParseOptions* options);
+        ParseResult* ParseString(const char* content);
+        void FreeResult(ParseResult* result);
+        CDEF;
+
+        try {
+            self::$ffiInstance = FFI::cdef($cdef, $libraryPath);
+            return self::$ffiInstance;
+        } catch (\FFI\Exception $e) {
+            throw new ParserException(
+                'Failed to load publiccode-parser library: ' . $e->getMessage(),
+                0,
+                $e
+            );
+        }
+    }
+
+    /**
+     * Find the publiccode-parser shared library
+     *
+     * @return string
+     * @throws ParserException
+     */
+    private function findLibrary(): string
+    {
+        $possiblePaths = [
+            __DIR__ . '/',
+            __DIR__ . '/../lib/',
+            __DIR__ . '/../vendor/lib/',
+            '/usr/local/lib/',
+            '/usr/lib/'
+        ];
+
+        foreach ($possiblePaths as $path) {
+            if (file_exists($path . 'libpubliccode-parser.so')) {
+                return $path;
+            }
+        }
+
+        throw new ParserException('libpubliccode-parser.so not found');
+    }
+
+    /**
+     * Process FFI result and convert to PublicCode object
+     *
+     * @param mixed $result FFI ParseResult pointer
+     * @return PublicCode
+     * @throws ValidationException
+     * @throws ParserException
+     */
+    private function processResult($result): PublicCode
+    {
+        if ($result->Error !== null) {
+            $errors = [];
+
+            if ($result->ErrorCount > 0 && $result->Errors !== null) {
+                for ($i = 0; $i < $result->ErrorCount; $i++) {
+                    $errors[] = FFI::string($result->Errors[$i]);
+                }
+            }
+
+            $errorMessage = FFI::string($result->Error);
+            $this->ffi->FreeResult($result);
+
+            throw new ValidationException($errorMessage, $errors);
+        }
+
+        if ($result->Data === null) {
+            $this->ffi->FreeResult($result);
+            throw new ParserException('No data returned from parser');
+        }
+
+        $jsonData = FFI::string($result->Data);
+        $this->ffi->FreeResult($result);
+
+        $data = json_decode($jsonData, true);
+
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            throw new ParserException('Failed to decode JSON data: ' . json_last_error_msg());
+        }
+
+        return new PublicCode($data);
+    }
+}
