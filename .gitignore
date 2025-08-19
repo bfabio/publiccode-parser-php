@@ -1,0 +1,13 @@
+/vendor/
+/composer.lock
+/.phpunit.cache/
+/.php-cs-fixer.cache
+/.phpunit.result.cache
+/phpunit.xml
+/phpstan.neon
+/bin/publiccode-parser-go
+.DS_Store
+.idea
+.vscode
+*.swp
+*.swo
