@@ -15,5 +15,21 @@
         "php": "^7.4 || ^8.0",
         "ext-json": "*",
         "ext-ffi": "*"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9.5 || ^10.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Bfabio\\PublicCodeParser\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Bfabio\\PublicCodeParser\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "vendor/bin/phpunit"
     }
 }
