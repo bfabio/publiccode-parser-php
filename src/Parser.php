@@ -134,6 +134,7 @@ class Parser
      */
     private function findLibrary(): string
     {
+	$libraryName = "libpubliccode-parser.so";
         $possiblePaths = [
             __DIR__ . '/',
             __DIR__ . '/../lib/',
@@ -143,8 +144,9 @@ class Parser
         ];
 
         foreach ($possiblePaths as $path) {
-            if (file_exists($path . 'libpubliccode-parser.so')) {
-                return $path;
+            $filePath = $path . $libraryName;
+            if (file_exists($filePath)) {
+                return $filePath;
             }
         }
 
