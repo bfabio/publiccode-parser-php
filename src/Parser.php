@@ -47,23 +47,24 @@ class Parser
      * @throws ParserException
      * @throws ValidationException
      */
-    public function parseFile(string $filePath): PublicCode
-    {
-        if (!file_exists($filePath)) {
-            throw new ParserException("File not found: {$filePath}");
-        }
-
-        $options = FFI::new('struct ParseOptions');
-        $options->DisableNetwork = $this->options->isDisableNetwork();
-
-        $result = $this->ffi->ParseFile($filePath, FFI::addr($options));
-
-        if ($result === null) {
-            throw new ParserException('Failed to parse publiccode.yml file');
-        }
-
-        return $this->processResult($result);
-    }
+    /* FIXME: re-enable */
+    /* public function parseFile(string $filePath): PublicCode */
+    /* { */
+    /*     if (!file_exists($filePath)) { */
+    /*         throw new ParserException("File not found: {$filePath}"); */
+    /*     } */
+    /**/
+    /*     $options = FFI::new('struct ParseOptions'); */
+    /*     $options->DisableNetwork = $this->options->isDisableNetwork(); */
+    /**/
+    /*     $result = $this->ffi->ParseFile($filePath, FFI::addr($options)); */
+    /**/
+    /*     if ($result === null) { */
+    /*         throw new ParserException('Failed to parse publiccode.yml file'); */
+    /*     } */
+    /**/
+    /*     return $this->processResult($result); */
+    /* } */
 
     /**
      * Validate publiccode.yml file without parsing
@@ -109,7 +110,6 @@ class Parser
             char** Errors;
         } ParseResult;
 
-        ParseResult* ParseFile(const char* filepath, ParseOptions* options);
         ParseResult* ParseString(const char* content);
         void FreeResult(ParseResult* result);
         CDEF;
