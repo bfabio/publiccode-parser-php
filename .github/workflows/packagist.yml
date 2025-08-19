@@ -1,0 +1,14 @@
+on:
+  release:
+    types: [published]
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Update Packagist
+        run: |
+          curl -XPOST -H'content-type:application/json' \
+            "https://packagist.org/api/update-package?username=bfabio&apiToken=${{ secrets.PACKAGIST_API_TOKEN }}" \
+            -d'{"repository":{"url":"https://github.com/bfabio/publiccode-parser-php"}}'
