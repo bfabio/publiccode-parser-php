@@ -21,6 +21,7 @@ import "C"
 import (
 	"encoding/json"
 	"github.com/italia/publiccode-parser-go/v4"
+	"strings"
 	"unsafe"
 )
 
@@ -28,28 +29,28 @@ import (
 func ParseString(content *C.char) *C.struct_ParseResult {
 	parser, err := publiccode.NewDefaultParser()
 	if err != nil {
-		panic()
+		// TODO: proper return
+		panic("err on NewDefaultParser()")
 	}
 
-	goContent := C.GoString(content)
+	goString := C.GoString(content)
 
-	pc, err := parser.Parse([]byte(goContent))
+	pc, err := parser.ParseStream(strings.NewReader(goString))
 
 	result := (*C.struct_ParseResult)(C.malloc(C.size_t(C.sizeof_struct_ParseResult)))
 
 	if err != nil {
 		result.Error = C.CString(err.Error())
 
-		if validationErr, ok := err.(*publiccode.ValidationErrors); ok {
-			errors := validationErr.Errors()
-			errCount := len(errors)
+		if validationRes, ok := err.(publiccode.ValidationResults); ok {
+			errCount := len(validationRes)
 			result.ErrorCount = C.int(errCount)
 
-			if len(errors) > 0 {
+			if errCount > 0 {
 				cErrors := C.malloc(C.size_t(errCount) * C.size_t(unsafe.Sizeof(uintptr(0))))
 				errorsSlice := unsafe.Slice((**C.char)(cErrors), errCount)
 
-				for i, e := range errors {
+				for i, e := range validationRes {
 					errorsSlice[i] = C.CString(e.Error())
 				}
 
@@ -86,7 +87,7 @@ func FreeResult(result *C.struct_ParseResult) {
 	}
 
 	if result.Errors != nil && result.ErrorCount > 0 {
-		errorsSlice := unsafe.Slice((**C.char)(cErrors), result.ErrorCount)
+		errorsSlice := unsafe.Slice((**C.char)(result.Errors), result.ErrorCount)
 		for i := 0; i < int(result.ErrorCount); i++ {
 			if errorsSlice[i] != nil {
 				C.free(unsafe.Pointer(errorsSlice[i]))
