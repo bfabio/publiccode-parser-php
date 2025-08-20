@@ -117,6 +117,8 @@ class Parser
 	    char* Error;
 	    int ErrorCount;
 	    char** Errors;
+	    int WarningCount;
+	    char** Warnings;
 	} ParseResult;
 
 	typedef uintptr_t ParserHandle;
@@ -175,23 +177,30 @@ class Parser
 	 */
 	private function processResult($result): PublicCode
 	{
-		if ($result->Error !== null) {
+		if ($result->ErrorCount > 0) {
 			$errors = [];
 
-			if ($result->ErrorCount > 0 && $result->Errors !== null) {
+			if ($result->Errors !== null) {
 				for ($i = 0; $i < $result->ErrorCount; $i++) {
 					$errors[] = FFI::string($result->Errors[$i]);
 				}
 			}
 
-			$errorMessage = FFI::string($result->Error);
 			$this->ffi->FreeResult($result);
 
-			throw new ValidationException($errorMessage, $errors);
+			throw new ValidationException(implode("\n", $errors), $errors);
+		}
+
+		if ($result->Error !== null) {
+			$message = FFI::string($result->Error);
+			$this->ffi->FreeResult($result);
+
+			throw new ParserException($message);
 		}
 
 		if ($result->Data === null) {
 			$this->ffi->FreeResult($result);
+
 			throw new ParserException('No data returned from parser');
 		}
 

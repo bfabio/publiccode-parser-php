@@ -57,7 +57,6 @@ class ParserTest extends TestCase
 		$this->assertJson($json);
 
 		$decoded = json_decode($json, true);
-		var_dump($decoded);
 		$this->assertEquals('Medusa', $decoded['name']);
 	}
 }
