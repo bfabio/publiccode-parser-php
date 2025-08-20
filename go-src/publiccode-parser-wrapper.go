@@ -20,9 +20,10 @@ struct ParseResult {
 import "C"
 import (
 	"encoding/json"
-	"github.com/italia/publiccode-parser-go/v4"
 	"strings"
 	"unsafe"
+
+	"github.com/italia/publiccode-parser-go/v4"
 )
 
 //export ParseString
@@ -43,17 +44,24 @@ func ParseString(content *C.char) *C.struct_ParseResult {
 	result.ErrorCount = 0
 
 	if err != nil {
-		result.Error = C.CString(err.Error())
-
 		if validationRes, ok := err.(publiccode.ValidationResults); ok {
-			errCount := len(validationRes)
+			var ve []publiccode.ValidationError
+			for _, res := range validationRes {
+				switch v := res.(type) {
+				case publiccode.ValidationError:
+					ve = append(ve, v)
+				}
+			}
+
+			errCount := len(ve)
 			result.ErrorCount = C.int(errCount)
 
 			if errCount > 0 {
+				result.Error = C.CString(err.Error())
 				cErrors := C.malloc(C.size_t(errCount) * C.size_t(unsafe.Sizeof(uintptr(0))))
 				errorsSlice := (*[1 << 28]*C.char)(cErrors)[:errCount:errCount]
 
-				for i, e := range validationRes {
+				for i, e := range ve {
 					errorsSlice[i] = C.CString(e.Error())
 				}
 
