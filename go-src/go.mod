@@ -2,7 +2,7 @@ module publiccode-parser-wrapper
 
 go 1.24.5
 
-require github.com/italia/publiccode-parser-go/v4 v4.3.1
+require github.com/italia/publiccode-parser-go/v4 v4.3.2
 
 require (
 	github.com/Jeffail/gabs v1.4.0 // indirect
