@@ -40,39 +40,43 @@ class Parser
     }
 
     /**
-     * Parse publiccode.yml file
+     * Parse a publiccode.yml file
      *
      * @param string $filePath Path to publiccode.yml
      * @return PublicCode
      * @throws ParserException
      * @throws ValidationException
      */
-    /* FIXME: re-enable */
-    /* public function parseFile(string $filePath): PublicCode */
-    /* { */
-    /*     if (!file_exists($filePath)) { */
-    /*         throw new ParserException("File not found: {$filePath}"); */
-    /*     } */
-    /**/
-    /*     $options = FFI::new('struct ParseOptions'); */
-    /*     $options->DisableNetwork = $this->options->isDisableNetwork(); */
-    /**/
-    /*     $result = $this->ffi->ParseFile($filePath, FFI::addr($options)); */
-    /**/
-    /*     if ($result === null) { */
-    /*         throw new ParserException('Failed to parse publiccode.yml file'); */
-    /*     } */
-    /**/
-    /*     return $this->processResult($result); */
-    /* } */
+    public function parseFile(string $filePath): PublicCode
+    {
+        if (!file_exists($filePath)) {
+            throw new ParserException("File not found: {$filePath}");
+        }
+
+        $fp = @fopen($filePath, 'rb');
+        if ($fp === false) {
+            throw new ParserException("Cannot open file: {$filePath}");
+        }
+
+        try {
+            $content = stream_get_contents($fp);
+            if ($content === false) {
+                    throw new ParserException('Failed to read from stream');
+            }
+
+            return $this->parse($content);
+        } finally {
+            fclose($fp);
+        }
+    }
 
     /**
-     * Validate publiccode.yml file without parsing
+     * Helper function to validate publiccode.yml file, with no error details
      *
      * @param string $filePath
      * @return bool
      */
-    public function validate(string $filePath): bool
+    public function isValid(string $filePath): bool
     {
         try {
             $this->parseFile($filePath);
