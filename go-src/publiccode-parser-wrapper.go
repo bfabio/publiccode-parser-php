@@ -37,7 +37,10 @@ func ParseString(content *C.char) *C.struct_ParseResult {
 
 	pc, err := parser.ParseStream(strings.NewReader(goString))
 
-	result := (*C.struct_ParseResult)(C.malloc(C.size_t(C.sizeof_struct_ParseResult)))
+	result := (*C.struct_ParseResult)(C.calloc(1, C.size_t(C.sizeof_struct_ParseResult)))
+	result.Error = nil
+	result.Errors = nil
+	result.ErrorCount = 0
 
 	if err != nil {
 		result.Error = C.CString(err.Error())
@@ -48,7 +51,7 @@ func ParseString(content *C.char) *C.struct_ParseResult {
 
 			if errCount > 0 {
 				cErrors := C.malloc(C.size_t(errCount) * C.size_t(unsafe.Sizeof(uintptr(0))))
-				errorsSlice := unsafe.Slice((**C.char)(cErrors), errCount)
+				errorsSlice := (*[1 << 28]*C.char)(cErrors)[:errCount:errCount]
 
 				for i, e := range validationRes {
 					errorsSlice[i] = C.CString(e.Error())
@@ -69,6 +72,7 @@ func ParseString(content *C.char) *C.struct_ParseResult {
 	}
 
 	result.Data = C.CString(string(jsonData))
+
 	return result
 }
 
@@ -91,9 +95,12 @@ func FreeResult(result *C.struct_ParseResult) {
 		for i := 0; i < int(result.ErrorCount); i++ {
 			if errorsSlice[i] != nil {
 				C.free(unsafe.Pointer(errorsSlice[i]))
+				errorsSlice[i] = nil
 			}
 		}
 		C.free(unsafe.Pointer(result.Errors))
+		result.Errors = nil
+		result.ErrorCount = 0
 	}
 }
 
