@@ -28,8 +28,7 @@ final class UpstreamFixturesTest extends TestCase
         $pc = $this->parser->parseFile($yamlPath);
         $this->assertNotNull($pc, $yamlPath);
 
-        $valid = $this->parser->validate($yamlPath);
-        $this->assertEquals(true, $valid);
+        $this->assertTrue($this->parser->validate($yamlPath));
     }
 
     /**
@@ -37,11 +36,19 @@ final class UpstreamFixturesTest extends TestCase
      */
     public function testInvalidFilesRaiseValidation(string $yamlPath): void
     {
-        $this->parser->parseFile($yamlPath);
         $this->expectException(ValidationException::class);
+        $this->parser->parseFile($yamlPath);
 
         $valid = $this->parser->validate($yamlPath);
         $this->assertEquals(false, $valid);
+    }
+
+    /**
+     * @dataProvider invalidFilesProvider
+     */
+    public function testInvalidFilesValidate(string $yamlPath): void
+    {
+        $this->assertFalse($this->parser->validate($yamlPath));
     }
 
     public static function validFilesProvider(): array
