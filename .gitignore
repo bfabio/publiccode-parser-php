@@ -10,4 +10,5 @@
 .vscode
 *.swp
 *.swo
-/tests/fixtures/testdata
+/tests/fixtures/testdata/*
+!/tests/fixtures/testdata/README

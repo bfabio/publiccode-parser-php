@@ -1,8 +1,8 @@
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   test:
@@ -18,7 +18,7 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v4
         with:
-          go-version: '1.24'
+          go-version: "1.24"
 
       - name: Build shared library
         run: make build
@@ -30,7 +30,7 @@ jobs:
         run: composer install --prefer-dist --no-interaction
 
       - run: |
-          git clone --depth 1 https://github.com/italia/publiccode-parser-go.git /tmp
-          mv /tmp/testdata/* tests/fixtures/testdata/
+          git clone --depth 1 https://github.com/italia/publiccode-parser-go.git /tmp/publiccode-parser-go
+          mv /tmp/publiccode-parser-go/testdata/* tests/fixtures/testdata/
 
       - run: composer run test
