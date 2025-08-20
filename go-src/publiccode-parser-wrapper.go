@@ -1,10 +1,11 @@
 package main
 
 /*
+#include <stdint.h>
 #include <stdlib.h>
 #include <stdbool.h>
 
-struct ParseOptions {
+struct ParserConfig {
         bool DisableNetwork;
         char *Branch;
         char *BaseURL;
@@ -16,32 +17,53 @@ struct ParseResult {
         int ErrorCount;
         char **Errors;
 };
+
+typedef uintptr_t ParserHandle;
 */
 import "C"
 import (
 	"encoding/json"
+	"errors"
+	"runtime/cgo"
 	"strings"
 	"unsafe"
 
 	"github.com/italia/publiccode-parser-go/v4"
 )
 
-//export ParseString
-func ParseString(content *C.char) *C.struct_ParseResult {
-	parser, err := publiccode.NewDefaultParser()
+//export NewParser
+func NewParser(disableNetwork C.bool, branch *C.char, baseURL *C.char) C.ParserHandle {
+	config := publiccode.ParserConfig{
+		DisableNetwork: bool(disableNetwork),
+		Branch:         C.GoString(branch),
+		BaseURL:        C.GoString(baseURL),
+	}
+
+	p, err := publiccode.NewParser(config)
 	if err != nil {
-		// TODO: proper return
-		panic("err on NewDefaultParser()")
+		return 0
+	}
+
+	return C.ParserHandle(cgo.NewHandle(p))
+}
+
+//export ParseString
+func ParseString(handle C.ParserHandle, content *C.char) *C.struct_ParseResult {
+	result := (*C.struct_ParseResult)(C.calloc(1, C.size_t(C.sizeof_struct_ParseResult)))
+	result.Error = nil
+	result.Errors = nil
+	result.ErrorCount = 0
+
+	parser, err := toGoParser(handle)
+	if err != nil {
+		result.Error = C.CString("Failed create a Parser: " + err.Error())
+
+		return result
 	}
 
 	goString := C.GoString(content)
 
 	pc, err := parser.ParseStream(strings.NewReader(goString))
-
-	result := (*C.struct_ParseResult)(C.calloc(1, C.size_t(C.sizeof_struct_ParseResult)))
-	result.Error = nil
-	result.Errors = nil
-	result.ErrorCount = 0
 
 	if err != nil {
 		if validationRes, ok := err.(publiccode.ValidationResults); ok {
@@ -110,6 +132,20 @@ func FreeResult(result *C.struct_ParseResult) {
 		result.Errors = nil
 		result.ErrorCount = 0
 	}
+}
+
+func toGoParser(handle C.ParserHandle) (*publiccode.Parser, error) {
+	if handle == 0 {
+		return nil, errors.New("nil handle")
+	}
+
+	v := cgo.Handle(handle).Value()
+	p, ok := v.(*publiccode.Parser)
+	if !ok || p == nil {
+		return nil, errors.New("invalid handle")
+	}
+
+	return p, nil
 }
 
 func main() {
