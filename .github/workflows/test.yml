@@ -29,4 +29,8 @@ jobs:
       - name: Install dependencies
         run: composer install --prefer-dist --no-interaction
 
+      - run: |
+          git clone --depth 1 https://github.com/italia/publiccode-parser-go.git /tmp
+          mv /tmp/testdata/* tests/fixtures/testdata/
+
       - run: composer run test

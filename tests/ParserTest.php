@@ -19,36 +19,6 @@ class ParserTest extends TestCase
         $this->parser = new Parser();
     }
 
-    public function testParseValidFile(): void
-    {
-        $yaml = $this->getValidPublicCodeYaml();
-        $publicCode = $this->parser->parse($yaml);
-
-        $this->assertEquals('Medusa', $publicCode->getName());
-        $this->assertEquals('https://example.com/medusa', $publicCode->getUrl());
-        $this->assertNotNull($publicCode->getDescription('en'));
-    }
-
-    public function testParseInvalidFile(): void
-    {
-        $this->expectException(ValidationException::class);
-
-        $yaml = "invalid: yaml: content:";
-        $this->parser->parse($yaml);
-    }
-
-    public function testParseWithOptions(): void
-    {
-        $options = new ParserOptions();
-        $options->setDisableNetwork(true);
-
-        $parser = new Parser($options);
-        $yaml = $this->getValidPublicCodeYaml();
-
-        $publicCode = $parser->parse($yaml);
-        $this->assertNotNull($publicCode);
-    }
-
     public function testPublicCodeAccessors(): void
     {
         $yaml = $this->getValidPublicCodeYaml();
@@ -91,26 +61,6 @@ class ParserTest extends TestCase
         $this->assertEquals('Medusa', $decoded['name']);
     }
 
-    public function testValidate(): void
-    {
-        $tempFile = tempnam(sys_get_temp_dir(), 'publiccode');
-        file_put_contents($tempFile, $this->getValidPublicCodeYaml());
-
-        $this->assertTrue($this->parser->validate($tempFile));
-
-        unlink($tempFile);
-    }
-
-    public function testValidateInvalid(): void
-    {
-        $tempFile = tempnam(sys_get_temp_dir(), 'publiccode');
-        file_put_contents($tempFile, 'invalid: yaml:');
-
-        $this->assertFalse($this->parser->validate($tempFile));
-
-        unlink($tempFile);
-    }
-
     public function testGetDependencies(): void
     {
         $yaml = $this->getValidPublicCodeYaml();
@@ -126,7 +76,7 @@ class ParserTest extends TestCase
 publiccodeYmlVersion: "0.2"
 name: Medusa
 url: "https://example.com/medusa"
-landingURL: "https://example.com/medusa"
+landingURL: "https://github.com/italia/developers-italia-api"
 releaseDate: "2017-04-15"
 developmentStatus: stable
 softwareType: standalone/web
