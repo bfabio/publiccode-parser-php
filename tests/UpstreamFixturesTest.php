@@ -11,82 +11,82 @@ use PHPUnit\Framework\TestCase;
 
 final class UpstreamFixturesTest extends TestCase
 {
-	private Parser $parser;
+    private Parser $parser;
 
-	protected function setUp(): void
-	{
-		$opts = new ParserConfig();
-		$opts->setDisableNetwork(true);
+    protected function setUp(): void
+    {
+        $opts = new ParserConfig();
+        $opts->setDisableNetwork(true);
 
-		$this->parser = new Parser($opts);
-	}
+        $this->parser = new Parser($opts);
+    }
 
-	/**
-	 * @dataProvider validFilesProvider
-	 */
-	public function testValidFilesParseWithoutError(string $yamlPath): void
-	{
-		$pc = $this->parser->parseFile($yamlPath);
-		$this->assertNotNull($pc, $yamlPath);
+    /**
+     * @dataProvider validFilesProvider
+     */
+    public function testValidFilesParseWithoutError(string $yamlPath): void
+    {
+        $pc = $this->parser->parseFile($yamlPath);
+        $this->assertNotNull($pc, $yamlPath);
 
-		$this->assertTrue($this->parser->isValid($yamlPath));
-	}
+        $this->assertTrue($this->parser->isValid($yamlPath));
+    }
 
-	/**
-	 * @dataProvider invalidFilesProvider
-	 */
-	public function testInvalidFilesRaiseValidationException(string $yamlPath): void
-	{
-		$this->expectException(ValidationException::class);
-		$this->parser->parseFile($yamlPath);
-	}
+    /**
+     * @dataProvider invalidFilesProvider
+     */
+    public function testInvalidFilesRaiseValidationException(string $yamlPath): void
+    {
+        $this->expectException(ValidationException::class);
+        $this->parser->parseFile($yamlPath);
+    }
 
-	/**
-	 * @dataProvider invalidFilesProvider
-	 */
-	public function testInvalidFilesIsValid(string $yamlPath): void
-	{
-		$this->assertFalse($this->parser->isValid($yamlPath));
-	}
+    /**
+     * @dataProvider invalidFilesProvider
+     */
+    public function testInvalidFilesIsValid(string $yamlPath): void
+    {
+        $this->assertFalse($this->parser->isValid($yamlPath));
+    }
 
-	/**
-	 * @return non-empty-array<string, array{string}>
-	 */
-	public static function validFilesProvider(): array
-	{
-		// TODO: re-enable no-network tests
-		// return self::scanTestdata(['valid', 'valid_with_warnings', 'valid/no-network', 'valid_with_warnings/no-network']);
-		return self::scanTestdata(['valid', 'valid_with_warnings']);
-	}
+    /**
+     * @return non-empty-array<string, array{string}>
+     */
+    public static function validFilesProvider(): array
+    {
+        // TODO: re-enable no-network tests
+        // return self::scanTestdata(['valid', 'valid_with_warnings', 'valid/no-network', 'valid_with_warnings/no-network']);
+        return self::scanTestdata(['valid', 'valid_with_warnings']);
+    }
 
-	/**
-	 * @return non-empty-array<string, array{string}>
-	 */
-	public static function invalidFilesProvider(): array
-	{
-		return self::scanTestdata(['invalid', 'invalid/no-network']);
-	}
+    /**
+     * @return non-empty-array<string, array{string}>
+     */
+    public static function invalidFilesProvider(): array
+    {
+        return self::scanTestdata(['invalid', 'invalid/no-network']);
+    }
 
-	/**
-	 * @param list<non-empty-string> $paths
-	 * @return non-empty-array<string, array{string}>
-	 */
-	private static function scanTestdata(array $paths): array
-	{
-		$root = __DIR__ . '/fixtures/testdata';
-		$out = [];
+    /**
+     * @param list<non-empty-string> $paths
+     * @return non-empty-array<string, array{string}>
+     */
+    private static function scanTestdata(array $paths): array
+    {
+        $root = __DIR__ . '/fixtures/testdata';
+        $out = [];
 
-		foreach (['v0'] as $v) {
-			foreach ($paths as $path) {
-				foreach (glob("$root/$v/$path/*.yml") ?: [] as $file) {
-					$out[$file] = [$file];
-				}
-			}
-		}
-		if (!$out) {
-			self::fail("Nessun file trovato in $root");
-		}
+        foreach (['v0'] as $v) {
+            foreach ($paths as $path) {
+                foreach (glob("$root/$v/$path/*.yml") ?: [] as $file) {
+                    $out[$file] = [$file];
+                }
+            }
+        }
+        if (!$out) {
+            self::fail("Nessun file trovato in $root");
+        }
 
-		return $out;
-	}
+        return $out;
+    }
 }
