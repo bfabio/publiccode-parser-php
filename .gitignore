@@ -4,7 +4,6 @@
 /.phpunit.result.cache
 /phpunit.xml
 /phpstan.neon
-/lib/libpubliccode-parser.*
 .DS_Store
 .idea
 .vscode
