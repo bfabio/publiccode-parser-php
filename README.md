@@ -10,6 +10,8 @@ You can install the package via composer:
 composer require bfabio/publiccode-parser-php
 ```
 
+It only supports Linux x86_64 for now.
+
 ## Usage
 
 ### Validation
