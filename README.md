@@ -20,9 +20,9 @@ use Bfabio\PublicCodeParser\Parser;
 $parser = new Parser();
 
 if ($parser->isValid('/path/to/publiccode.yml')) {
-    echo "publiccode.yml is valid\n!";
+    echo "publiccode.yml is valid!\n";
 } else {
-    echo "publiccode.yml is NOT valid\n!";
+    echo "publiccode.yml is NOT valid!\n";
 };
 ```
 
@@ -90,41 +90,6 @@ $options = new ParserConfig();
 $options->setDisableNetwork(true); // Disable remote existance checks for URLs
 
 $parser = new Parser($options);
-```
-
-### Using in Drupal
-
-Example of using the parser in a Drupal module:
-
-```php
-namespace Drupal\my_module\Service;
-
-use Bfabio\PublicCodeParser\Parser;
-use Bfabio\PublicCodeParser\Exception\ParserException;
-
-class PublicCodeService {
-    
-    private $parser;
-    
-    public function __construct() {
-        $this->parser = new Parser();
-    }
-    
-    public function validatePublicCode($filePath) {
-        try {
-            $publicCode = $this->parser->parseFile($filePath);
-            return [
-                'valid' => true,
-                'data' => $publicCode
-            ];
-        } catch (ParserException $e) {
-            return [
-                'valid' => false,
-                'errors' => $e->getErrors()
-            ];
-        }
-    }
-}
 ```
 
 ## License
