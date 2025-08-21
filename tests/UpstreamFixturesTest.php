@@ -53,8 +53,7 @@ final class UpstreamFixturesTest extends TestCase
 	{
 		// TODO: re-enable no-network tests
 		// return self::scanTestdata(['valid', 'valid_with_warnings', 'valid/no-network', 'valid_with_warnings/no-network']);
-		// return self::scanTestdata(['valid', 'valid_with_warnings']);
-		return self::scanTestdata(['valid_with_warnings']);
+		return self::scanTestdata(['valid', 'valid_with_warnings']);
 	}
 
 	public static function invalidFilesProvider(): array
