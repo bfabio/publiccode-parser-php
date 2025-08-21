@@ -36,7 +36,7 @@ class ParserTest extends TestCase
 		$this->assertEquals('community', $maintenance['type']);
 
 		$categories = $publicCode->getCategories();
-		$this->assertContains('it-development', $categories);
+		$this->assertContains('cloud-management', $categories);
 	}
 
 	public function testToArray(): void
