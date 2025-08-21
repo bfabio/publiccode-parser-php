@@ -4,10 +4,7 @@ declare(strict_types=1);
 
 namespace Bfabio\PublicCodeParser\Tests;
 
-use Bfabio\PublicCodeParser\Exception\ParserException;
-use Bfabio\PublicCodeParser\Exception\ValidationException;
 use Bfabio\PublicCodeParser\Parser;
-use Bfabio\PublicCodeParser\ParserConfig;
 use PHPUnit\Framework\TestCase;
 
 class ParserTest extends TestCase
@@ -17,8 +14,16 @@ class ParserTest extends TestCase
 
 	protected function setUp(): void
 	{
+		$path = __DIR__ . "/fixtures/valid.minimal.yml";
+
 		$this->parser = new Parser();
-		$this->yaml = file_get_contents(__DIR__ . "/fixtures/valid.minimal.yml");
+
+		$content = file_get_contents($path);
+		if ($content === false) {
+			throw new \RuntimeException("Cannot read fixture: $path");
+		}
+
+		$this->yaml = $content;
 	}
 
 	public function testPublicCodeAccessors(): void

@@ -21,6 +21,7 @@ class Parser
 		$this->config = $config ?? new ParserConfig();
 
 		$this->ffi = $this->getFFI();
+		/** @phpstan-ignore-next-line */
 		$this->handle = $this->ffi->NewParser(
 			$this->config->isNetworkDisabled(),
 			$this->config->getBranch(),
@@ -41,6 +42,7 @@ class Parser
 	 */
 	public function parse(string $content): PublicCode
 	{
+		/** @phpstan-ignore-next-line */
 		$result = $this->ffi->ParseString($this->handle, $content);
 
 		if ($result === null) {
@@ -178,6 +180,7 @@ class Parser
 	private function processResult($result): PublicCode
 	{
 		if ($result->ErrorCount > 0) {
+			/** @var list<non-empty-string> */
 			$errors = [];
 
 			if ($result->Errors !== null) {
@@ -186,6 +189,7 @@ class Parser
 				}
 			}
 
+			/** @phpstan-ignore-next-line */
 			$this->ffi->FreeResult($result);
 
 			throw new ValidationException(implode("\n", $errors), $errors);
@@ -193,18 +197,21 @@ class Parser
 
 		if ($result->Error !== null) {
 			$message = FFI::string($result->Error);
+			/** @phpstan-ignore-next-line */
 			$this->ffi->FreeResult($result);
 
 			throw new ParserException($message);
 		}
 
 		if ($result->Data === null) {
+			/** @phpstan-ignore-next-line */
 			$this->ffi->FreeResult($result);
 
 			throw new ParserException('No data returned from parser');
 		}
 
 		$jsonData = FFI::string($result->Data);
+		/** @phpstan-ignore-next-line */
 		$this->ffi->FreeResult($result);
 
 		$data = json_decode($jsonData, true);

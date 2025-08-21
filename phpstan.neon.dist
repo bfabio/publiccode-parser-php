@@ -1,0 +1,8 @@
+parameters:
+    level: 8
+    paths:
+        - src
+        - tests
+    excludePaths:
+        - vendor
+        - src/PublicCode.php # TODO: re-enable it after a proper typed mapping with the Go struct

@@ -49,6 +49,9 @@ final class UpstreamFixturesTest extends TestCase
 		$this->assertFalse($this->parser->isValid($yamlPath));
 	}
 
+	/**
+	 * @return non-empty-array<string, array{string}>
+	 */
 	public static function validFilesProvider(): array
 	{
 		// TODO: re-enable no-network tests
@@ -56,12 +59,18 @@ final class UpstreamFixturesTest extends TestCase
 		return self::scanTestdata(['valid', 'valid_with_warnings']);
 	}
 
+	/**
+	 * @return non-empty-array<string, array{string}>
+	 */
 	public static function invalidFilesProvider(): array
 	{
 		return self::scanTestdata(['invalid', 'invalid/no-network']);
 	}
 
-	/** @return list<array{string}> */
+	/**
+	 * @param list<non-empty-string> $paths
+	 * @return non-empty-array<string, array{string}>
+	 */
 	private static function scanTestdata(array $paths): array
 	{
 		$root = __DIR__ . '/fixtures/testdata';
@@ -69,7 +78,7 @@ final class UpstreamFixturesTest extends TestCase
 
 		foreach (['v0'] as $v) {
 			foreach ($paths as $path) {
-				foreach (glob("$root/$v/$path/*.yml") as $file) {
+				foreach (glob("$root/$v/$path/*.yml") ?: [] as $file) {
 					$out[$file] = [$file];
 				}
 			}

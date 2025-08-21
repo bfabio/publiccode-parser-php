@@ -34,3 +34,6 @@ jobs:
           mv /tmp/publiccode-parser-go/testdata/* tests/fixtures/testdata/
 
       - run: composer run test
+
+      - name: Run static analysis
+        run: composer run phpstan
