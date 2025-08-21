@@ -24,11 +24,6 @@ if ($parser->isValid('/path/to/publiccode.yml')) {
 } else {
     echo "publiccode.yml is NOT valid\n!";
 };
-
-// Access parsed data
-echo $publicCode->getName(); // Get software name
-echo $publicCode->getDescription('it'); // Get Italian description
-echo $publicCode->getDescription('en'); // Get English description
 ```
 
 ### Parsing
@@ -48,6 +43,11 @@ try {
     // $publicCode = $parser->parse($yamlContent);
 
     echo "publiccode.yml file is valid!\n";
+
+    // Access parsed data
+    echo $publicCode->getName(); // Get software name
+    echo $publicCode->getDescription('it'); // Get Italian description
+    echo $publicCode->getDescription('en'); // Get English description
 } catch (ValidationException $e) {
     echo "publiccode.yml file is NOT valid: " . $e->getMessage() . "\n";
 
