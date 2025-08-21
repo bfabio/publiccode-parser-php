@@ -37,3 +37,6 @@ jobs:
 
       - name: Run static analysis
         run: composer run phpstan
+
+      - name: Run linter
+        run: composer run cs
