@@ -10,23 +10,20 @@ You can install the package via composer:
 composer require bfabio/publiccode-parser-php
 ```
 
-The package will automatically build the required shared library during installation using the post-install-cmd script.
-
 ## Usage
 
-### Basic parsing
+### Validation
 
 ```php
 use Bfabio\PublicCodeParser\Parser;
 
 $parser = new Parser();
 
-// Parse from file
-$publicCode = $parser->parseFile('/path/to/publiccode.yml');
-
-// Parse from string
-$yamlContent = file_get_contents('/path/to/publiccode.yml');
-$publicCode = $parser->parse($yamlContent);
+if ($parser->isValid('/path/to/publiccode.yml')) {
+    echo "publiccode.yml is valid\n!";
+} else {
+    echo "publiccode.yml is NOT valid\n!";
+};
 
 // Access parsed data
 echo $publicCode->getName(); // Get software name
@@ -34,30 +31,40 @@ echo $publicCode->getDescription('it'); // Get Italian description
 echo $publicCode->getDescription('en'); // Get English description
 ```
 
-### Validation
+### Parsing
 
 ```php
 use Bfabio\PublicCodeParser\Parser;
 use Bfabio\PublicCodeParser\Exception\ValidationException;
+use Bfabio\PublicCodeParser\Exception\ParserException;
 
 $parser = new Parser();
 
 try {
     $publicCode = $parser->parseFile('/path/to/publiccode.yml');
-    echo "PublicCode file is valid!\n";
+
+    // // or parse from string
+    // $yamlContent = file_get_contents('/path/to/publiccode.yml');
+    // $publicCode = $parser->parse($yamlContent);
+
+    echo "publiccode.yml file is valid!\n";
 } catch (ValidationException $e) {
-    echo "Validation failed: " . $e->getMessage() . "\n";
+    echo "publiccode.yml file is NOT valid: " . $e->getMessage() . "\n";
 
     // Get detailed validation errors
     foreach ($e->getErrors() as $error) {
         echo "- " . $error . "\n";
     }
+} catch (ParserException $e) {
+    echo "publiccode.yml file is NOT valid: " . $e->getMessage() . "\n";
 }
 ```
 
 ### Working with the PublicCode object
 
 ```php
+$parser = new Parser();
+
 $publicCode = $parser->parseFile('/path/to/publiccode.yml');
 
 $name = $publicCode->getName();
@@ -71,15 +78,16 @@ $allDescriptions = $publicCode->getAllDescriptions();
 $platforms = $publicCode->getPlatforms(); // ['web', 'android', 'ios', etc.]
 ```
 
-### Advanced options
+### Advanced config
 
 ```php
 use Bfabio\PublicCodeParser\Parser;
-use Bfabio\PublicCodeParser\ParserOptions;
+use Bfabio\PublicCodeParser\ParserConfig;
 
-// Create parser with custom options
-$options = new ParserOptions();
-$options->setDisableNetwork(true); // Disable remote file validation
+// Create parser with custom config
+$options = new ParserConfig();
+
+$options->setDisableNetwork(true); // Disable remote existance checks for URLs
 
 $parser = new Parser($options);
 ```
