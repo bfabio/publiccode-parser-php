@@ -172,6 +172,14 @@ func FreeResult(result *C.struct_ParseResult) {
 		result.WarningCount = 0
 	}
 
+	C.free(unsafe.Pointer(result))
+
+}
+
+//export FreeParser
+func FreeParser(handle C.ParserHandle) {
+	h := cgo.Handle(handle)
+	h.Delete()
 }
 
 func toGoParser(handle C.ParserHandle) (*publiccode.Parser, error) {
