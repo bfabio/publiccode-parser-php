@@ -31,6 +31,7 @@ class ParserTest extends TestCase
         $publicCode = $this->parser->parse($this->yaml);
 
         $this->assertEquals('Medusa', $publicCode->getName());
+        $this->assertEquals('https://github.com/italia/developers.italia.it.git', $publicCode->getUrl());
         $this->assertEquals('AGPL-3.0-or-later', $publicCode->getLicense());
         $this->assertEquals(['web'], $publicCode->getPlatforms());
 
