@@ -101,6 +101,7 @@ extern "C" {
 extern ParserHandle NewParser(_Bool disableNetwork, char* branch, char* baseURL);
 extern struct ParseResult* ParseString(ParserHandle handle, char* content);
 extern void FreeResult(struct ParseResult* result);
+extern void FreeParser(ParserHandle handle);
 
 #ifdef __cplusplus
 }

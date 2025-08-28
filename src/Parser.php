@@ -31,6 +31,15 @@ class Parser
         }
     }
 
+    public function __destruct()
+    {
+        if ($this->handle != 0) {
+            /** @phpstan-ignore-next-line */
+            $this->ffi->FreeParser($this->handle);
+            $this->handle = 0;
+        }
+    }
+
     /**
      * Parse publiccode.yml content
      *
@@ -127,6 +136,7 @@ class Parser
 	ParserHandle NewParser(bool disableNetwork, const char* branch, const char* baseURL);
 	ParseResult* ParseString(ParserHandle handle, const char* content);
 	void FreeResult(ParseResult* result);
+	void FreeParser(ParserHandle handle);
 	CDEF;
 
         try {
@@ -151,11 +161,11 @@ class Parser
     {
         $libraryName = 'libpubliccode-parser.so';
         $possiblePaths = [
-                __DIR__ . '/',
-                __DIR__ . '/../lib/',
-                __DIR__ . '/../vendor/lib/',
-                '/usr/local/lib/',
-                '/usr/lib/',
+            __DIR__ . '/',
+            __DIR__ . '/../lib/',
+            __DIR__ . '/../vendor/lib/',
+            '/usr/local/lib/',
+            '/usr/lib/',
         ];
 
         foreach ($possiblePaths as $path) {
