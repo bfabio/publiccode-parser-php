@@ -14,7 +14,7 @@ class ParserTest extends TestCase
 
     protected function setUp(): void
     {
-        $path = __DIR__ . '/fixtures/valid.minimal.yml';
+        $path = __DIR__ . '/fixtures/valid.yml';
 
         $this->parser = new Parser();
 
@@ -30,10 +30,16 @@ class ParserTest extends TestCase
     {
         $publicCode = $this->parser->parse($this->yaml);
 
+        $this->assertEquals('0', $publicCode->getPubliccodeYmlVersion());
         $this->assertEquals('Medusa', $publicCode->getName());
+        $this->assertEquals('mySuite', $publicCode->getApplicationSuite());
         $this->assertEquals('https://github.com/italia/developers.italia.it.git', $publicCode->getUrl());
+        $this->assertEquals(null, $publicCode->getLandingUrl());
+        $this->assertEquals('0.10.11', $publicCode->getSoftwareVersion());
+        $this->assertEquals(null, $publicCode->getLogo());
         $this->assertEquals('AGPL-3.0-or-later', $publicCode->getLicense());
         $this->assertEquals(['web'], $publicCode->getPlatforms());
+        $this->assertEquals(null, $publicCode->getRoadmap());
 
         $this->assertNotNull($publicCode->getDescription('en_GB'));
         $this->assertNull($publicCode->getDescription('it'));

@@ -2,12 +2,15 @@ publiccodeYmlVersion: "0"
 
 name: Medusa
 url: "https://github.com/italia/developers.italia.it.git"
+applicationSuite: mySuite
 
 platforms:
   - web
 
 categories:
   - cloud-management
+
+softwareVersion: "0.10.11"
 
 developmentStatus: development
 
