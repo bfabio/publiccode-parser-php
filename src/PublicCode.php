@@ -15,9 +15,19 @@ class PublicCode implements JsonSerializable
         $this->data = $data;
     }
 
+    public function getPubliccodeYmlVersion(): string
+    {
+        return $this->data['publiccodeYmlVersion'];
+    }
+
     public function getName(): string
     {
         return $this->data['name'];
+    }
+
+    public function getApplicationSuite(): ?string
+    {
+        return $this->data['applicationSuite'] ?? null;
     }
 
     public function getUrl(): string
@@ -28,6 +38,31 @@ class PublicCode implements JsonSerializable
     public function getLandingUrl(): ?string
     {
         return $this->data['landingURL'] ?? null;
+    }
+
+    /**
+     * @return string[]
+     */
+    public function getIsBasedOn(): array
+    {
+        if ($this->data['isBasedOn'] === null) {
+            return [];
+        }
+        if (is_string($this->data['isBasedOn'])) {
+            return [$this->data['isBasedOn']];
+        }
+
+        return $this->data['isBasedOn'];
+    }
+
+    public function getSoftwareVersion(): ?string
+    {
+        return $this->data['softwareVersion'] ?? null;
+    }
+
+    public function getLogo(): ?string
+    {
+        return $this->data['logo'] ?? null;
     }
 
     public function getDescription(string $language = 'en'): ?string
@@ -68,6 +103,11 @@ class PublicCode implements JsonSerializable
     public function getCategories(): array
     {
         return $this->data['categories'];
+    }
+
+    public function getRoadmap(): ?string
+    {
+        return $this->data['roadmap'] ?? null;
     }
 
     public function getPlatforms(): array
