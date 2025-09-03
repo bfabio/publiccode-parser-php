@@ -6,7 +6,7 @@ namespace Bfabio\PublicCodeParser;
 
 class ParserConfig
 {
-    private bool $disableNetwork = true;
+    private bool $disableNetwork = false;
     private string $branch = '';
     private string $baseURL = '';
 
