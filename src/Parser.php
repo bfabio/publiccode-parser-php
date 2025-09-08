@@ -70,25 +70,14 @@ class Parser
      */
     public function parseFile(string $filePath): PublicCode
     {
-        if (!file_exists($filePath)) {
-            throw new ParserException("File not found: {$filePath}");
+        /** @phpstan-ignore-next-line */
+        $result = $this->ffi->ParseFile($this->handle, $filePath);
+
+        if ($result === null) {
+            throw new ParserException("Failed to parse $filePath");
         }
 
-        $fp = @fopen($filePath, 'rb');
-        if ($fp === false) {
-            throw new ParserException("Cannot open file: {$filePath}");
-        }
-
-        try {
-            $content = stream_get_contents($fp);
-            if ($content === false) {
-                throw new ParserException('Failed to read from stream');
-            }
-
-            return $this->parse($content);
-        } finally {
-            fclose($fp);
-        }
+        return $this->processResult($result);
     }
 
     /**
@@ -135,6 +124,7 @@ class Parser
 
 	ParserHandle NewParser(bool disableNetwork, const char* branch, const char* baseURL);
 	ParseResult* ParseString(ParserHandle handle, const char* content);
+	ParseResult* ParseFile(ParserHandle handle, const char* uri);
 	void FreeResult(ParseResult* result);
 	void FreeParser(ParserHandle handle);
 	CDEF;
