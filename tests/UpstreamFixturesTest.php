@@ -12,13 +12,15 @@ use PHPUnit\Framework\TestCase;
 final class UpstreamFixturesTest extends TestCase
 {
     private Parser $parser;
+    private Parser $parserNoNetwork;
 
     protected function setUp(): void
     {
+        $this->parser = new Parser();
+
         $opts = new ParserConfig();
         $opts->setDisableNetwork(true);
-
-        $this->parser = new Parser($opts);
+        $this->parserNoNetwork = new Parser($opts);
     }
 
     /**
@@ -33,12 +35,31 @@ final class UpstreamFixturesTest extends TestCase
     }
 
     /**
+     * @dataProvider validFilesNoNetworkProvider
+     */
+    public function testValidFilesNoNetworkParseWithoutError(string $yamlPath): void
+    {
+        $pc = $this->parserNoNetwork->parseFile($yamlPath);
+        $this->assertNotNull($pc, $yamlPath);
+
+        $this->assertTrue($this->parserNoNetwork->isValid($yamlPath));
+    }
+    /**
      * @dataProvider invalidFilesProvider
      */
     public function testInvalidFilesRaiseValidationException(string $yamlPath): void
     {
         $this->expectException(ValidationException::class);
         $this->parser->parseFile($yamlPath);
+    }
+
+    /**
+     * @dataProvider invalidFilesNoNetworkProvider
+     */
+    public function testInvalidFilesNoNetworkRaiseValidationException(string $yamlPath): void
+    {
+        $this->expectException(ValidationException::class);
+        $this->parserNoNetwork->parseFile($yamlPath);
     }
 
     /**
@@ -54,17 +75,30 @@ final class UpstreamFixturesTest extends TestCase
      */
     public static function validFilesProvider(): array
     {
-        // TODO: re-enable no-network tests
-        // return self::scanTestdata(['valid', 'valid_with_warnings', 'valid/no-network', 'valid_with_warnings/no-network']);
         return self::scanTestdata(['valid', 'valid_with_warnings']);
     }
 
     /**
      * @return non-empty-array<string, array{string}>
      */
+    public static function validFilesNoNetworkProvider(): array
+    {
+        return self::scanTestdata(['valid/no-network', 'valid_with_warnings/no-network']);
+    }
+    /**
+     * @return non-empty-array<string, array{string}>
+     */
     public static function invalidFilesProvider(): array
     {
-        return self::scanTestdata(['invalid', 'invalid/no-network']);
+        return self::scanTestdata(['invalid']);
+    }
+
+    /**
+     * @return non-empty-array<string, array{string}>
+     */
+    public static function invalidFilesNoNetworkProvider(): array
+    {
+        return self::scanTestdata(['invalid/no-network']);
     }
 
     /**
