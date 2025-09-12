@@ -44,7 +44,8 @@ jobs:
       - run: echo "$GITHUB_WORKSPACE/bin" >> $GITHUB_PATH
 
       - run: |
-          git clone --depth 1 https://github.com/italia/publiccode-parser-go.git /tmp/publiccode-parser-go
+          VERSION=$(go list -C go-src -m -f '{{.Version}}' github.com/italia/publiccode-parser-go/v4)
+          git clone --depth 1 --branch $VERSION https://github.com/italia/publiccode-parser-go.git /tmp/publiccode-parser-go
           mv /tmp/publiccode-parser-go/testdata/* tests/fixtures/testdata/
 
       - run: composer run test
