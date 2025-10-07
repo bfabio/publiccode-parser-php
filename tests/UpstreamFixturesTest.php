@@ -29,9 +29,9 @@ final class UpstreamFixturesTest extends TestCase
     public function testValidFilesParseWithoutError(string $yamlPath): void
     {
         $pc = $this->parser->parseFile($yamlPath);
-        $this->assertNotNull($pc, $yamlPath);
+        static::assertNotNull($pc, $yamlPath);
 
-        $this->assertTrue($this->parser->isValid($yamlPath));
+        static::assertTrue($this->parser->isValid($yamlPath));
     }
 
     /**
@@ -40,10 +40,11 @@ final class UpstreamFixturesTest extends TestCase
     public function testValidFilesNoNetworkParseWithoutError(string $yamlPath): void
     {
         $pc = $this->parserNoNetwork->parseFile($yamlPath);
-        $this->assertNotNull($pc, $yamlPath);
+        static::assertNotNull($pc, $yamlPath);
 
-        $this->assertTrue($this->parserNoNetwork->isValid($yamlPath));
+        static::assertTrue($this->parserNoNetwork->isValid($yamlPath));
     }
+
     /**
      * @dataProvider invalidFilesProvider
      */
@@ -67,7 +68,7 @@ final class UpstreamFixturesTest extends TestCase
      */
     public function testInvalidFilesIsValid(string $yamlPath): void
     {
-        $this->assertFalse($this->parser->isValid($yamlPath));
+        static::assertFalse($this->parser->isValid($yamlPath));
     }
 
     /**
@@ -85,6 +86,7 @@ final class UpstreamFixturesTest extends TestCase
     {
         return self::scanTestdata(['valid/no-network', 'valid_with_warnings/no-network']);
     }
+
     /**
      * @return non-empty-array<string, array{string}>
      */

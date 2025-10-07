@@ -41,9 +41,9 @@ final class ParserGoldenFilesTest extends TestCase
     /* public function testGenerateGoldenValidWithWarnings(string $yamlPath): void */
     /* { */
     /*     $this->generateGolden($yamlPath); */
-    /**/
+    
     /*     $pc = $this->parser->parseFile($yamlPath); */
-    /**/
+    
     /*     $pc->getWarnings() */
     /* } */
 
@@ -62,7 +62,7 @@ final class ParserGoldenFilesTest extends TestCase
         try {
             $this->parser->parseFile($yamlPath);
 
-            $this->fail('Expected ValidationException was not thrown');
+            static::fail('Expected ValidationException was not thrown');
         } catch (ValidationException $e) {
             $this->assertErrorsMatchGolden($e, $goldenPath);
         }
@@ -76,7 +76,7 @@ final class ParserGoldenFilesTest extends TestCase
         try {
             $this->parserNoNetwork->parseFile($yamlPath);
 
-            $this->fail('Expected ValidationException was not thrown');
+            static::fail('Expected ValidationException was not thrown');
         } catch (ValidationException $e) {
             $this->assertErrorsMatchGolden($e, $goldenPath);
         }
@@ -165,10 +165,8 @@ final class ParserGoldenFilesTest extends TestCase
         return $outFile;
     }
 
-    private function assertErrorsMatchGolden(
-        ValidationException $e,
-        string $goldenPath,
-    ): void {
+    private function assertErrorsMatchGolden(ValidationException $e, string $goldenPath): void
+    {
         $content = file_get_contents($goldenPath);
         if ($content === false) {
             throw new \RuntimeException("Cannot read file: $goldenPath");
@@ -177,8 +175,7 @@ final class ParserGoldenFilesTest extends TestCase
         $golden = json_decode($content, true);
 
         $goldenMessages = array_map(
-            fn (array $g) =>
-            sprintf(
+            fn(array $g) => sprintf(
                 'publiccode.yml:%d:%d: %s: %s%s',
                 $g['line'],
                 $g['column'],
@@ -186,17 +183,13 @@ final class ParserGoldenFilesTest extends TestCase
                 $g['key'] !== '' ? $g['key'] . ': ' : '',
                 $g['description'],
             ),
-            array_filter($golden, fn (array $g) => $g['type'] === 'error'),
+            array_filter($golden, fn(array $g) => $g['type'] === 'error'),
         );
         $phpErrors = $e->getErrors();
 
         sort($goldenMessages);
         sort($phpErrors);
 
-        $this->assertSame(
-            $goldenMessages,
-            $phpErrors,
-            "Mismatch between golden file and PHP binding for $goldenPath",
-        );
+        $this->assertSame($goldenMessages, $phpErrors, "Mismatch between golden file and PHP binding for $goldenPath");
     }
 }

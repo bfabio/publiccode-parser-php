@@ -91,7 +91,7 @@ class Parser
         try {
             $this->parseFile($filePath);
             return true;
-        } catch (ParserException | ValidationException $e) {
+        } catch (ParserException|ValidationException $e) {
             return false;
         }
     }
@@ -111,33 +111,29 @@ class Parser
         $libraryPath = $this->findLibrary();
 
         $cdef = <<<'CDEF'
-	typedef struct {
-	    char* Data;
-	    char* Error;
-	    int ErrorCount;
-	    char** Errors;
-	    int WarningCount;
-	    char** Warnings;
-	} ParseResult;
+        typedef struct {
+            char* Data;
+            char* Error;
+            int ErrorCount;
+            char** Errors;
+            int WarningCount;
+            char** Warnings;
+        } ParseResult;
 
-	typedef uintptr_t ParserHandle;
+        typedef uintptr_t ParserHandle;
 
-	ParserHandle NewParser(bool disableNetwork, const char* branch, const char* baseURL);
-	ParseResult* ParseString(ParserHandle handle, const char* content);
-	ParseResult* ParseFile(ParserHandle handle, const char* uri);
-	void FreeResult(ParseResult* result);
-	void FreeParser(ParserHandle handle);
-	CDEF;
+        ParserHandle NewParser(bool disableNetwork, const char* branch, const char* baseURL);
+        ParseResult* ParseString(ParserHandle handle, const char* content);
+        ParseResult* ParseFile(ParserHandle handle, const char* uri);
+        void FreeResult(ParseResult* result);
+        void FreeParser(ParserHandle handle);
+        CDEF;
 
         try {
             self::$ffiInstance = FFI::cdef($cdef, $libraryPath);
             return self::$ffiInstance;
         } catch (\FFI\Exception $e) {
-            throw new ParserException(
-                'Failed to load publiccode-parser library: ' . $e->getMessage(),
-                0,
-                $e,
-            );
+            throw new ParserException('Failed to load publiccode-parser library: ' . $e->getMessage(), 0, $e);
         }
     }
 
