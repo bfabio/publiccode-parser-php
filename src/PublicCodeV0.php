@@ -6,7 +6,7 @@ namespace Bfabio\PublicCodeParser;
 
 use JsonSerializable;
 
-class PublicCode implements JsonSerializable
+class PublicCodeV0 implements JsonSerializable
 {
     private array $data;
 

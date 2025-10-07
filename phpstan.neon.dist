@@ -5,4 +5,4 @@ parameters:
         - tests
     excludePaths:
         - vendor
-        - src/PublicCode.php # TODO: re-enable it after a proper typed mapping with the Go struct
+        - src/PublicCodeV0.php # TODO: re-enable it after a proper typed mapping with the Go struct
