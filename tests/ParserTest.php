@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Bfabio\PublicCodeParser\Tests;
 
 use Bfabio\PublicCodeParser\Parser;
+use Bfabio\PublicCodeParser\PublicCodeV0;
 use PHPUnit\Framework\TestCase;
 
 class ParserTest extends TestCase
@@ -24,6 +25,13 @@ class ParserTest extends TestCase
         }
 
         $this->yaml = $content;
+    }
+
+    public function testPublicCodeType(): void
+    {
+        $publicCode = $this->parser->parse($this->yaml);
+
+        $this->assertInstanceOf(PublicCodeV0::class, $publicCode);
     }
 
     public function testPublicCodeAccessors(): void

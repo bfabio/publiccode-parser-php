@@ -44,11 +44,11 @@ class Parser
      * Parse publiccode.yml content
      *
      * @param string $content YAML content
-     * @return PublicCode
+     * @return PublicCodeV0
      * @throws ParserException
      * @throws ValidationException
      */
-    public function parse(string $content): PublicCode
+    public function parse(string $content): PublicCodeV0
     {
         /** @phpstan-ignore-next-line */
         $result = $this->ffi->ParseString($this->handle, $content);
@@ -64,11 +64,11 @@ class Parser
      * Parse a publiccode.yml file
      *
      * @param string $filePath Path to publiccode.yml
-     * @return PublicCode
+     * @return PublicCodeV0
      * @throws ParserException
      * @throws ValidationException
      */
-    public function parseFile(string $filePath): PublicCode
+    public function parseFile(string $filePath): PublicCodeV0
     {
         /** @phpstan-ignore-next-line */
         $result = $this->ffi->ParseFile($this->handle, $filePath);
@@ -172,11 +172,11 @@ class Parser
      * Process FFI result and convert to PublicCode object
      *
      * @param mixed $result FFI ParseResult pointer
-     * @return PublicCode
+     * @return PublicCodeV0
      * @throws ValidationException
      * @throws ParserException
      */
-    private function processResult($result): PublicCode
+    private function processResult($result): PublicCodeV0
     {
         if ($result->ErrorCount > 0) {
             /** @var list<non-empty-string> */
@@ -219,6 +219,6 @@ class Parser
             throw new ParserException('Failed to decode JSON data: ' . json_last_error_msg());
         }
 
-        return new PublicCode($data);
+        return new PublicCodeV0($data);
     }
 }

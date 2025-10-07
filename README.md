@@ -69,15 +69,24 @@ $parser = new Parser();
 
 $publicCode = $parser->parseFile('/path/to/publiccode.yml');
 
-$name = $publicCode->getName();
-$url = $publicCode->getUrl();
-$landingUrl = $publicCode->getLandingUrl();
+if ($publicCode instanceof PublicCodeV0) {
+    $name = $publicCode->getName();
+    $url = $publicCode->getUrl();
+    $landingUrl = $publicCode->getLandingUrl();
 
-$descriptionIt = $publicCode->getDescription('it');
-$descriptionEn = $publicCode->getDescription('en');
-$allDescriptions = $publicCode->getAllDescriptions();
+    $descriptionIt = $publicCode->getDescription('it');
+    $descriptionEn = $publicCode->getDescription('en');
+    $allDescriptions = $publicCode->getAllDescriptions();
 
-$platforms = $publicCode->getPlatforms(); // ['web', 'android', 'ios', etc.]
+    $platforms = $publicCode->getPlatforms(); // ['web', 'android', 'ios', etc.]
+}
+
+/* In the future, when v1 will be released */
+/*
+else if ($publicCode instanceof PublicCodeV1) {
+    ...
+}
+*/
 ```
 
 ### Advanced config
