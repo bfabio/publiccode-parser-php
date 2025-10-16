@@ -30,7 +30,7 @@ import (
 	"strings"
 	"unsafe"
 
-	"github.com/italia/publiccode-parser-go/v4"
+	"github.com/italia/publiccode-parser-go/v5"
 )
 
 //export NewParser
