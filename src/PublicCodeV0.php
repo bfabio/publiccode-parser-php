@@ -100,9 +100,9 @@ class PublicCodeV0 implements JsonSerializable
         return $this->data['legal']['repoOwner'] ?? null;
     }
 
-    public function getCategories(): array
+    public function getCategories(): ?array
     {
-        return $this->data['categories'];
+        return $this->data['categories'] ?? null;
     }
 
     public function getRoadmap(): ?string
@@ -122,6 +122,16 @@ class PublicCodeV0 implements JsonSerializable
         }
 
         return new \DateTime($this->data['releaseDate']);
+    }
+
+    public function getOrganisationName(): ?string
+    {
+        return $this->data['organisation']['name'] ?? null;
+    }
+
+    public function getOrganisationUri(): ?string
+    {
+        return $this->data['organisation']['uri'] ?? null;
     }
 
     public function getDevelopmentStatus(): string
