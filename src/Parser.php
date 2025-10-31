@@ -186,7 +186,7 @@ class Parser
 
         throw new ParserException(
             "libpubliccode-parser library not found for platform: {$os}-{$arch}. " .
-            "Searched for: {$libraryName}"
+            "Searched for: {$libraryName}",
         );
     }
 
