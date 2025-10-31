@@ -38,9 +38,6 @@ jobs:
           make build-darwin-amd64 || echo "macOS AMD64 build skipped"
           make build-darwin-arm64 || echo "macOS ARM64 build skipped"
 
-          # List built libraries
-          ls -lah lib/
-
       - run: |
           if ! git diff --quiet -- lib/; then
             git config user.name "${GITHUB_ACTOR}"

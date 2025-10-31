@@ -149,7 +149,6 @@ class Parser
      */
     private function findLibrary(): string
     {
-        // Detect platform
         $os = $this->detectOS();
         $arch = $this->detectArchitecture();
         $ext = $os === 'darwin' ? 'dylib' : 'so';
@@ -221,12 +220,10 @@ class Parser
     {
         $machine = php_uname('m');
 
-        // x86-64 variants
         if (in_array($machine, ['x86_64', 'amd64', 'AMD64'], true)) {
             return 'amd64';
         }
 
-        // ARM64 variants
         if (in_array($machine, ['arm64', 'aarch64', 'ARM64'], true)) {
             return 'arm64';
         }

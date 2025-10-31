@@ -9,8 +9,6 @@ GOARCH := $(shell go env GOARCH)
 # Determine file extension based on OS
 ifeq ($(GOOS),darwin)
 	EXT=dylib
-else ifeq ($(GOOS),linux)
-	EXT=so
 else
 	EXT=so
 endif
