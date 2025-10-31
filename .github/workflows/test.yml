@@ -20,7 +20,7 @@ jobs:
         with:
           go-version: "1.24"
 
-      - name: Build shared library
+      - name: Build shared library for current platform
         run: make build
 
       - name: Validate composer.json

@@ -20,19 +20,37 @@ jobs:
         with:
           go-version: "1.24"
 
-      - name: Build shared library
-        run: make build
+      - name: Install cross-compilation tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc-aarch64-linux-gnu
+
+      - name: Build shared libraries for all platforms
+        run: |
+          # Build Linux AMD64 (native)
+          make build-linux-amd64
+
+          # Build Linux ARM64 (cross-compile)
+          make build-linux-arm64
+
+          # Build macOS binaries (cross-compile)
+          # Note: macOS builds may have limitations in Linux CI
+          make build-darwin-amd64 || echo "macOS AMD64 build skipped"
+          make build-darwin-arm64 || echo "macOS ARM64 build skipped"
+
+          # List built libraries
+          ls -lah lib/
 
       - run: |
-          if ! git diff --quiet -- lib/libpubliccode-parser.so; then
+          if ! git diff --quiet -- lib/; then
             git config user.name "${GITHUB_ACTOR}"
             git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
 
-            git add lib/libpubliccode-parser.*
-            git commit -m "ci: update lib/libpubliccode-parser.so [skip ci]"
+            git add lib/
+            git commit -m "ci: update shared libraries [skip ci]"
             git push
           else
-            echo "No changes in lib/libpubliccode-parser.so"
+            echo "No changes in lib/"
           fi
 
       - name: Update Packagist
