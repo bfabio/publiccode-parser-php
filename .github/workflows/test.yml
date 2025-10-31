@@ -6,14 +6,41 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            platform: linux-amd64
+            php-version: "8.3"
+            run-tests: true
+          - os: ubuntu-latest
+            platform: linux-arm64
+            php-version: "8.3"
+            run-tests: false
+          - os: macos-latest
+            platform: darwin-arm64
+            php-version: "8.3"
+            run-tests: true
+
+    name: ${{ matrix.run-tests && 'Test' || 'Build' }} on ${{ matrix.platform }} (PHP ${{ matrix.php-version }})
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
 
+      - name: Install ARM64 cross-compilation tools
+        if: matrix.platform == 'linux-arm64'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc-aarch64-linux-gnu
+
       - name: Setup PHP
+        if: matrix.run-tests
         uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-version }}
 
       - name: Setup Go
         uses: actions/setup-go@v6
@@ -21,31 +48,47 @@ jobs:
           go-version: "1.24"
 
       - name: Build shared library for current platform
-        run: make build
+        run: |
+          if [ "${{ matrix.platform }}" = "linux-arm64" ]; then
+            make build-linux-arm64
+          else
+            make build
+          fi
 
       - name: Validate composer.json
+        if: matrix.run-tests
         run: composer validate --strict
 
       - name: Install dependencies
+        if: matrix.run-tests
         run: composer install --prefer-dist --no-interaction
 
       - name: Run static analysis
+        if: matrix.run-tests
         run: composer run phpstan
 
       - name: Run linter
+        if: matrix.run-tests
         run: composer run cs
 
       - name: Build publiccode-parser CLI (pinned by go-src/go.mod)
+        if: matrix.run-tests
         run: |
           mkdir -p "$GITHUB_WORKSPACE/bin"
           go build -C go-src -o "$GITHUB_WORKSPACE/bin/publiccode-parser" \
             github.com/italia/publiccode-parser-go/v5/publiccode-parser
 
-      - run: echo "$GITHUB_WORKSPACE/bin" >> $GITHUB_PATH
+      - name: Add bin to PATH
+        if: matrix.run-tests
+        run: echo "$GITHUB_WORKSPACE/bin" >> $GITHUB_PATH
 
-      - run: |
+      - name: Download test fixtures
+        if: matrix.run-tests
+        run: |
           VERSION=$(go list -C go-src -m -f '{{.Version}}' github.com/italia/publiccode-parser-go/v5)
           git clone --depth 1 --branch $VERSION https://github.com/italia/publiccode-parser-go.git /tmp/publiccode-parser-go
           mv /tmp/publiccode-parser-go/testdata/* tests/fixtures/testdata/
 
-      - run: composer run test
+      - name: Run tests
+        if: matrix.run-tests
+        run: composer run test

@@ -33,10 +33,8 @@ jobs:
           # Build Linux ARM64 (cross-compile)
           make build-linux-arm64
 
-          # Build macOS binaries (cross-compile)
-          # Note: macOS builds may have limitations in Linux CI
-          make build-darwin-amd64 || echo "macOS AMD64 build skipped"
-          make build-darwin-arm64 || echo "macOS ARM64 build skipped"
+          # Build macOS Apple Silicon (cross-compile)
+          make build-darwin-arm64
 
       - run: |
           if ! git diff --quiet -- lib/; then

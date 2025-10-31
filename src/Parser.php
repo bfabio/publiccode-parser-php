@@ -153,11 +153,7 @@ class Parser
         $arch = $this->detectArchitecture();
         $ext = $os === 'darwin' ? 'dylib' : 'so';
 
-        // Platform-specific library name
         $libraryName = "libpubliccode-parser-{$os}-{$arch}.{$ext}";
-
-        // Legacy library name for backward compatibility
-        $legacyLibraryName = 'libpubliccode-parser.so';
 
         $possiblePaths = [
             __DIR__ . '/',
@@ -167,17 +163,8 @@ class Parser
             '/usr/lib/',
         ];
 
-        // First, try to find platform-specific library
         foreach ($possiblePaths as $path) {
             $filePath = $path . $libraryName;
-            if (file_exists($filePath)) {
-                return $filePath;
-            }
-        }
-
-        // Fall back to legacy library name (for backward compatibility)
-        foreach ($possiblePaths as $path) {
-            $filePath = $path . $legacyLibraryName;
             if (file_exists($filePath)) {
                 return $filePath;
             }
@@ -192,7 +179,7 @@ class Parser
     /**
      * Detect operating system
      *
-     * @return string 'linux' or 'darwin'
+     * @return 'linux'|'darwin'
      * @throws ParserException
      */
     private function detectOS(): string
@@ -213,7 +200,7 @@ class Parser
     /**
      * Detect CPU architecture
      *
-     * @return string 'amd64' or 'arm64'
+     * @return 'amd64'|'arm64'
      * @throws ParserException
      */
     private function detectArchitecture(): string

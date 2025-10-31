@@ -16,7 +16,6 @@ This library supports the following platforms:
 
 - **Linux x86-64** (AMD64) - Fully supported
 - **Linux ARM64** (aarch64) - Fully supported
-- **macOS Intel** (x86-64) - Fully supported
 - **macOS Apple Silicon** (ARM64/M1/M2/M3/M4) - Fully supported
 
 The library automatically detects your platform and loads the appropriate binary.
