@@ -14,7 +14,7 @@ jobs:
           - os: ubuntu-latest
             platform: linux-amd64
             php-version: "8.3"
-          - os: ubuntu-latest-arm
+          - os: ubuntu-24.04-arm
             platform: linux-arm64
             php-version: "8.3"
           - os: macos-latest
