@@ -149,7 +149,12 @@ class Parser
      */
     private function findLibrary(): string
     {
-        $libraryName = 'libpubliccode-parser.so';
+        $os = $this->detectOS();
+        $arch = $this->detectArchitecture();
+        $ext = $os === 'darwin' ? 'dylib' : 'so';
+
+        $libraryName = "libpubliccode-parser-{$os}-{$arch}.{$ext}";
+
         $possiblePaths = [
             __DIR__ . '/',
             __DIR__ . '/../lib/',
@@ -165,7 +170,52 @@ class Parser
             }
         }
 
-        throw new ParserException('libpubliccode-parser.so not found');
+        throw new ParserException(
+            "libpubliccode-parser library not found for platform: {$os}-{$arch}. " .
+            "Searched for: {$libraryName}",
+        );
+    }
+
+    /**
+     * Detect operating system
+     *
+     * @return 'linux'|'darwin'
+     * @throws ParserException
+     */
+    private function detectOS(): string
+    {
+        $osFamily = PHP_OS_FAMILY;
+
+        if ($osFamily === 'Linux') {
+            return 'linux';
+        }
+
+        if ($osFamily === 'Darwin') {
+            return 'darwin';
+        }
+
+        throw new ParserException("Unsupported operating system: {$osFamily}");
+    }
+
+    /**
+     * Detect CPU architecture
+     *
+     * @return 'amd64'|'arm64'
+     * @throws ParserException
+     */
+    private function detectArchitecture(): string
+    {
+        $machine = php_uname('m');
+
+        if (in_array($machine, ['x86_64', 'amd64', 'AMD64'], true)) {
+            return 'amd64';
+        }
+
+        if (in_array($machine, ['arm64', 'aarch64', 'ARM64'], true)) {
+            return 'arm64';
+        }
+
+        throw new ParserException("Unsupported architecture: {$machine}");
     }
 
     /**

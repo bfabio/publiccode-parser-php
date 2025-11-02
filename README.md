@@ -10,7 +10,13 @@ You can install the package via composer:
 composer require bfabio/publiccode-parser-php
 ```
 
-It only supports Linux x86_64 for now.
+### Supported Platforms
+
+This library supports the following platforms:
+
+- **Linux x86-64** (AMD64) - Fully supported
+- **Linux ARM64** (aarch64) - Fully supported
+- **macOS Apple Silicon** (ARM64/M1/M2/M3/M4) - Fully supported
 
 ## Usage
 
