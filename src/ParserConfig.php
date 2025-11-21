@@ -7,6 +7,7 @@ namespace Bfabio\PublicCodeParser;
 class ParserConfig
 {
     private bool $disableNetwork = false;
+    private bool $disableExternalChecks = false;
     private string $branch = '';
     private string $baseURL = '';
 
@@ -18,6 +19,18 @@ class ParserConfig
     public function setDisableNetwork(bool $disableNetwork): self
     {
         $this->disableNetwork = $disableNetwork;
+
+        return $this;
+    }
+
+    public function areExternalChecksDisabled(): bool
+    {
+        return $this->disableExternalChecks;
+    }
+
+    public function setDisableExternalChecks(bool $disableExternalChecks): self
+    {
+        $this->disableExternalChecks = $disableExternalChecks;
 
         return $this;
     }

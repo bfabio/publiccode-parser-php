@@ -23,6 +23,7 @@ class Parser
         /** @phpstan-ignore-next-line */
         $this->handle = $this->ffi->NewParser(
             $this->config->isNetworkDisabled(),
+            $this->config->areExternalChecksDisabled(),
             $this->config->getBranch(),
             $this->config->getBaseURL(),
         );
@@ -122,7 +123,7 @@ class Parser
 
 	typedef uintptr_t ParserHandle;
 
-	ParserHandle NewParser(bool disableNetwork, const char* branch, const char* baseURL);
+	ParserHandle NewParser(bool disableNetwork, bool disableExternalChecks, const char* branch, const char* baseURL);
 	ParseResult* ParseString(ParserHandle handle, const char* content);
 	ParseResult* ParseFile(ParserHandle handle, const char* uri);
 	void FreeResult(ParseResult* result);
@@ -172,7 +173,7 @@ class Parser
 
         throw new ParserException(
             "libpubliccode-parser library not found for platform: {$os}-{$arch}. " .
-            "Searched for: {$libraryName}",
+                "Searched for: {$libraryName}",
         );
     }
 
