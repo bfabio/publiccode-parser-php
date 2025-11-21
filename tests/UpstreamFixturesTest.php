@@ -13,6 +13,7 @@ final class UpstreamFixturesTest extends TestCase
 {
     private Parser $parser;
     private Parser $parserNoNetwork;
+    private Parser $parserNoExternalChecks;
 
     protected function setUp(): void
     {
@@ -21,6 +22,10 @@ final class UpstreamFixturesTest extends TestCase
         $opts = new ParserConfig();
         $opts->setDisableNetwork(true);
         $this->parserNoNetwork = new Parser($opts);
+
+        $opts = new ParserConfig();
+        $opts->setDisableExternalChecks(true);
+        $this->parserNoExternalChecks = new Parser($opts);
     }
 
     /**
@@ -68,6 +73,12 @@ final class UpstreamFixturesTest extends TestCase
     public function testInvalidFilesIsValid(string $yamlPath): void
     {
         $this->assertFalse($this->parser->isValid($yamlPath));
+    }
+
+    public function testExternalChecksDisabled(): void
+    {
+        $root = __DIR__ . '/fixtures/testdata';
+        $this->assertTrue($this->parserNoExternalChecks->isValid("$root/v0/invalid/logo_missing_file.yml"));
     }
 
     /**
