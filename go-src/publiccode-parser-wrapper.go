@@ -7,6 +7,7 @@ package main
 
 struct ParserConfig {
         bool DisableNetwork;
+        bool DisableExternalChecks;
         char *Branch;
         char *BaseURL;
 };
@@ -34,11 +35,12 @@ import (
 )
 
 //export NewParser
-func NewParser(disableNetwork C.bool, branch *C.char, baseURL *C.char) C.ParserHandle {
+func NewParser(disableNetwork C.bool, disableExternalChecks C.bool, branch *C.char, baseURL *C.char) C.ParserHandle {
 	config := publiccode.ParserConfig{
-		DisableNetwork: bool(disableNetwork),
-		Branch:         C.GoString(branch),
-		BaseURL:        C.GoString(baseURL),
+		DisableNetwork:        bool(disableNetwork),
+		DisableExternalChecks: bool(disableExternalChecks),
+		Branch:                C.GoString(branch),
+		BaseURL:               C.GoString(baseURL),
 	}
 
 	p, err := publiccode.NewParser(config)
