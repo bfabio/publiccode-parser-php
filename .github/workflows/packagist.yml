@@ -60,13 +60,17 @@ jobs:
           merge-multiple: true
 
       - run: |
-          git config user.name "${GITHUB_ACTOR}"
-          git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+          if ! git diff --quiet -- lib/; then
+            git config user.name "${GITHUB_ACTOR}"
+            git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
 
-          git add lib/
-          git commit -m "ci: update shared libraries [skip ci]"
-          git show
-          git push
+            git add lib/
+            git commit -m "ci: update shared libraries [skip ci]"
+            git show
+            git push
+          else
+            echo "No changes in lib/"
+          fi
 
       - name: Update Packagist
         run: |
