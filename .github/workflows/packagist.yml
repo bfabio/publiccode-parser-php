@@ -56,6 +56,8 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           path: lib/
+          pattern: lib-*
+          merge-multiple: true
 
       - run: |
           ls lib/
