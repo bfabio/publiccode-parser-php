@@ -16,7 +16,7 @@ require (
 	github.com/italia/httpclient-lib-go v0.0.2 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect
 	github.com/rivo/uniseg v0.4.2 // indirect
-	github.com/sirupsen/logrus v1.9.0 // indirect
+	github.com/sirupsen/logrus v1.9.1 // indirect
 	github.com/tomnomnom/linkheader v0.0.0-20180905144013-02ca5825eb80 // indirect
 	golang.org/x/crypto v0.45.0 // indirect
 	golang.org/x/net v0.47.0 // indirect
