@@ -39,7 +39,7 @@ jobs:
       - name: Build shared library for platform
         run: make build-${{ matrix.platform }}
 
-      - uses: actions/upload-artifact@v6
+      - uses: actions/upload-artifact@v7
         with:
           name: lib-${{ matrix.platform }}
           path: lib/libpubliccode-parser-${{ matrix.platform }}.*
