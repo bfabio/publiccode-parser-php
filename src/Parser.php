@@ -26,6 +26,7 @@ class Parser
             $this->config->areExternalChecksDisabled(),
             $this->config->getBranch(),
             $this->config->getBaseURL(),
+            $this->config->getHTTPTimeout() * 1_000_000_000,
         );
         if ($this->handle == 0) {
             throw new ParserException('Failed to create parser');
@@ -123,7 +124,7 @@ class Parser
 
 	typedef uintptr_t ParserHandle;
 
-	ParserHandle NewParser(bool disableNetwork, bool disableExternalChecks, const char* branch, const char* baseURL);
+	ParserHandle NewParser(bool disableNetwork, bool disableExternalChecks, const char* branch, const char* baseURL, int64_t httpTimeout);
 	ParseResult* ParseString(ParserHandle handle, const char* content);
 	ParseResult* ParseFile(ParserHandle handle, const char* uri);
 	void FreeResult(ParseResult* result);
