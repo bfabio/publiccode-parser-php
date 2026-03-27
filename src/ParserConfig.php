@@ -10,6 +10,7 @@ class ParserConfig
     private bool $disableExternalChecks = false;
     private string $branch = '';
     private string $baseURL = '';
+    private int $httpTimeout = 0;
 
     public function isNetworkDisabled(): bool
     {
@@ -55,6 +56,22 @@ class ParserConfig
     public function setBaseURL(string $url): self
     {
         $this->baseURL = $url;
+
+        return $this;
+    }
+
+    public function getHTTPTimeout(): int
+    {
+        return $this->httpTimeout;
+    }
+
+    /**
+     * @param int $seconds Maximum duration in seconds for each HTTP request.
+     *                     0 means use the default (30s).
+     */
+    public function setHTTPTimeout(int $seconds): self
+    {
+        $this->httpTimeout = $seconds;
 
         return $this;
     }

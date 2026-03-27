@@ -10,6 +10,7 @@ struct ParserConfig {
         bool DisableExternalChecks;
         char *Branch;
         char *BaseURL;
+        int64_t HTTPTimeout;
 };
 
 struct ParseResult {
@@ -29,18 +30,20 @@ import (
 	"errors"
 	"runtime/cgo"
 	"strings"
+	"time"
 	"unsafe"
 
 	"github.com/italia/publiccode-parser-go/v5"
 )
 
 //export NewParser
-func NewParser(disableNetwork C.bool, disableExternalChecks C.bool, branch *C.char, baseURL *C.char) C.ParserHandle {
+func NewParser(disableNetwork C.bool, disableExternalChecks C.bool, branch *C.char, baseURL *C.char, httpTimeout C.int64_t) C.ParserHandle {
 	config := publiccode.ParserConfig{
 		DisableNetwork:        bool(disableNetwork),
 		DisableExternalChecks: bool(disableExternalChecks),
 		Branch:                C.GoString(branch),
 		BaseURL:               C.GoString(baseURL),
+		Timeout:               time.Duration(httpTimeout),
 	}
 
 	p, err := publiccode.NewParser(config)
