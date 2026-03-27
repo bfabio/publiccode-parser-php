@@ -34,7 +34,7 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v6
         with:
-          go-version: "1.24"
+          go-version-file: go-src/go.mod
 
       - name: Build shared library for platform
         run: make build-${{ matrix.platform }}
