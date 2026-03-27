@@ -49,7 +49,7 @@ class ParserTest extends TestCase
         $this->assertEquals(['web'], $publicCode->getPlatforms());
         $this->assertEquals(null, $publicCode->getRoadmap());
 
-        $this->assertNotNull($publicCode->getDescription('en_GB'));
+        $this->assertNotNull($publicCode->getDescription('en-GB'));
         $this->assertNull($publicCode->getDescription('it'));
 
         $maintenance = $publicCode->getMaintenance();
