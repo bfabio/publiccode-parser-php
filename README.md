@@ -56,6 +56,10 @@ try {
     echo $publicCode->getName(); // Get software name
     echo $publicCode->getDescription('it'); // Get Italian description
     echo $publicCode->getDescription('en'); // Get English description
+
+    foreach ($publicCode->getWarnings() as $warning) {
+        echo "- " . $warning . "\n";
+    }
 } catch (ValidationException $e) {
     echo "publiccode.yml file is NOT valid: " . $e->getMessage() . "\n";
 
