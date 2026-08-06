@@ -76,45 +76,9 @@ func ParseFile(handle C.ParserHandle, uri *C.char) *C.struct_ParseResult {
 	pc, err := parser.Parse(goString)
 
 	if err != nil {
-		if validationRes, ok := err.(publiccode.ValidationResults); ok {
-			for _, res := range validationRes {
-				switch res.(type) {
-				case publiccode.ValidationError:
-					result.ErrorCount += 1
-				case publiccode.ValidationWarning:
-					result.WarningCount += 1
-				}
-			}
-
-			var errorsSlice []*C.char
-			cErrors := unsafe.Pointer(nil)
-			if result.ErrorCount > 0 {
-				cErrors = C.malloc(C.size_t(result.ErrorCount) * C.size_t(unsafe.Sizeof(uintptr(0))))
-				errorsSlice = (*[1 << 28]*C.char)(cErrors)[:result.ErrorCount:result.ErrorCount]
-			}
-
-			var warningsSlice []*C.char
-			cWarnings := unsafe.Pointer(nil)
-			if result.WarningCount > 0 {
-				cWarnings = C.malloc(C.size_t(result.WarningCount) * C.size_t(unsafe.Sizeof(uintptr(0))))
-				warningsSlice = (*[1 << 28]*C.char)(cWarnings)[:result.WarningCount:result.WarningCount]
-			}
-
-			errIdx := 0
-			warnIdx := 0
-			for _, res := range validationRes {
-				switch res.(type) {
-				case publiccode.ValidationError:
-					errorsSlice[errIdx] = C.CString(res.Error())
-					errIdx += 1
-				case publiccode.ValidationWarning:
-					warningsSlice[warnIdx] = C.CString(res.Error())
-					warnIdx += 1
-				}
-			}
-
-			result.Errors = (**C.char)(cErrors)
-			result.Warnings = (**C.char)(cWarnings)
+		var validationRes publiccode.ValidationResults
+		if errors.As(err, &validationRes) {
+			fillValidationResult(result, validationRes)
 		} else {
 			result.Error = C.CString(err.Error())
 
@@ -160,45 +124,9 @@ func ParseString(handle C.ParserHandle, content *C.char) *C.struct_ParseResult {
 	pc, err := parser.ParseStream(strings.NewReader(goString))
 
 	if err != nil {
-		if validationRes, ok := err.(publiccode.ValidationResults); ok {
-			for _, res := range validationRes {
-				switch res.(type) {
-				case publiccode.ValidationError:
-					result.ErrorCount += 1
-				case publiccode.ValidationWarning:
-					result.WarningCount += 1
-				}
-			}
-
-			var errorsSlice []*C.char
-			cErrors := unsafe.Pointer(nil)
-			if result.ErrorCount > 0 {
-				cErrors = C.malloc(C.size_t(result.ErrorCount) * C.size_t(unsafe.Sizeof(uintptr(0))))
-				errorsSlice = (*[1 << 28]*C.char)(cErrors)[:result.ErrorCount:result.ErrorCount]
-			}
-
-			var warningsSlice []*C.char
-			cWarnings := unsafe.Pointer(nil)
-			if result.WarningCount > 0 {
-				cWarnings = C.malloc(C.size_t(result.WarningCount) * C.size_t(unsafe.Sizeof(uintptr(0))))
-				warningsSlice = (*[1 << 28]*C.char)(cWarnings)[:result.WarningCount:result.WarningCount]
-			}
-
-			errIdx := 0
-			warnIdx := 0
-			for _, res := range validationRes {
-				switch res.(type) {
-				case publiccode.ValidationError:
-					errorsSlice[errIdx] = C.CString(res.Error())
-					errIdx += 1
-				case publiccode.ValidationWarning:
-					warningsSlice[warnIdx] = C.CString(res.Error())
-					warnIdx += 1
-				}
-			}
-
-			result.Errors = (**C.char)(cErrors)
-			result.Warnings = (**C.char)(cWarnings)
+		var validationRes publiccode.ValidationResults
+		if errors.As(err, &validationRes) {
+			fillValidationResult(result, validationRes)
 		} else {
 			result.Error = C.CString(err.Error())
 
@@ -220,6 +148,57 @@ func ParseString(handle C.ParserHandle, content *C.char) *C.struct_ParseResult {
 	result.Data = C.CString(string(jsonData))
 
 	return result
+}
+
+// fillValidationResult serializes validation issues as JSON so callers can
+// access their fields without parsing the human-readable error message.
+func fillValidationResult(result *C.struct_ParseResult, validationRes publiccode.ValidationResults) {
+	for _, res := range validationRes {
+		var validationError publiccode.ValidationError
+		var validationWarning publiccode.ValidationWarning
+
+		switch {
+		case errors.As(res, &validationError):
+			result.ErrorCount += 1
+		case errors.As(res, &validationWarning):
+			result.WarningCount += 1
+		}
+	}
+
+	var errorsSlice []*C.char
+	cErrors := unsafe.Pointer(nil)
+	if result.ErrorCount > 0 {
+		cErrors = C.malloc(C.size_t(result.ErrorCount) * C.size_t(unsafe.Sizeof(uintptr(0))))
+		errorsSlice = (*[1 << 28]*C.char)(cErrors)[:result.ErrorCount:result.ErrorCount]
+	}
+
+	var warningsSlice []*C.char
+	cWarnings := unsafe.Pointer(nil)
+	if result.WarningCount > 0 {
+		cWarnings = C.malloc(C.size_t(result.WarningCount) * C.size_t(unsafe.Sizeof(uintptr(0))))
+		warningsSlice = (*[1 << 28]*C.char)(cWarnings)[:result.WarningCount:result.WarningCount]
+	}
+
+	errIdx := 0
+	warnIdx := 0
+	for _, res := range validationRes {
+		var validationError publiccode.ValidationError
+		var validationWarning publiccode.ValidationWarning
+
+		switch {
+		case errors.As(res, &validationError):
+			payload, _ := json.Marshal(validationError)
+			errorsSlice[errIdx] = C.CString(string(payload))
+			errIdx += 1
+		case errors.As(res, &validationWarning):
+			payload, _ := json.Marshal(validationWarning)
+			warningsSlice[warnIdx] = C.CString(string(payload))
+			warnIdx += 1
+		}
+	}
+
+	result.Errors = (**C.char)(cErrors)
+	result.Warnings = (**C.char)(cWarnings)
 }
 
 //export FreeResult
