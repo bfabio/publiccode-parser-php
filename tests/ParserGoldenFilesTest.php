@@ -38,21 +38,24 @@ final class ParserGoldenFilesTest extends TestCase
     }
 
     /** @dataProvider validFilesWithWarningsProvider */
-    /* public function testGenerateGoldenValidWithWarnings(string $yamlPath): void */
-    /* { */
-    /*     $this->generateGolden($yamlPath); */
-    /**/
-    /*     $pc = $this->parser->parseFile($yamlPath); */
-    /**/
-    /*     $pc->getWarnings() */
-    /* } */
+    public function testGenerateGoldenValidWithWarnings(string $yamlPath): void
+    {
+        $goldenPath = $this->generateGolden($yamlPath);
+
+        $publicCode = $this->parser->parseFile($yamlPath);
+
+        $this->assertWarningsMatchGolden($publicCode->getWarnings(), $goldenPath);
+    }
 
     /** @dataProvider validFilesWithWarningsNoNetworkProvider */
-    /* public function testGenerateGoldenValidWithWarningsNoNetwork(string $yamlPath): void */
-    /* { */
-    /*     $this->generateGolden($yamlPath, true); */
-    /*     $this->assertFileExists($this->goldenPath($yamlPath)); */
-    /* } */
+    public function testGenerateGoldenValidWithWarningsNoNetwork(string $yamlPath): void
+    {
+        $goldenPath = $this->generateGolden($yamlPath, true);
+
+        $publicCode = $this->parserNoNetwork->parseFile($yamlPath);
+
+        $this->assertWarningsMatchGolden($publicCode->getWarnings(), $goldenPath);
+    }
 
     /** @dataProvider invalidFilesProvider */
     public function testGenerateGoldenInvalid(string $yamlPath): void
@@ -83,20 +86,18 @@ final class ParserGoldenFilesTest extends TestCase
     }
 
     /** @return non-empty-array<string, array{string}> */
-    // Enable when https://github.com/bfabio/publiccode-parser-php/issues/11 is fixed
-    /* public static function validFilesWithWarningsProvider(): array */
-    /* { */
-    /*     // no 'valid/' directory here because those files don't have any errors or warnings */
-    /*     return self::scanTestdata(['valid_with_warnings']); */
-    /* } */
+    public static function validFilesWithWarningsProvider(): array
+    {
+        // no 'valid/' directory here because those files don't have any errors or warnings
+        return self::scanTestdata(['valid_with_warnings']);
+    }
 
     /** @return non-empty-array<string, array{string}> */
-    // Enable when https://github.com/bfabio/publiccode-parser-php/issues/11 is fixed
-    /* public static function validFilesWithWarningsNoNetworkProvider(): array */
-    /* { */
-    /*     // no 'valid/no-network' directory here because those files don't have any errors or warnings */
-    /*     return self::scanTestdata(['valid/no-network', 'valid_with_warnings/no-network']); */
-    /* } */
+    public static function validFilesWithWarningsNoNetworkProvider(): array
+    {
+        // no 'valid/no-network' directory here because those files don't have any errors or warnings
+        return self::scanTestdata(['valid/no-network', 'valid_with_warnings/no-network']);
+    }
 
     /** @return non-empty-array<string, array{string}> */
     public static function invalidFilesProvider(): array
@@ -196,6 +197,39 @@ final class ParserGoldenFilesTest extends TestCase
         $this->assertSame(
             $goldenMessages,
             $phpErrors,
+            "Mismatch between golden file and PHP binding for $goldenPath",
+        );
+    }
+
+    /** @param list<string> $warnings */
+    private function assertWarningsMatchGolden(array $warnings, string $goldenPath): void
+    {
+        $content = file_get_contents($goldenPath);
+        if ($content === false) {
+            throw new \RuntimeException("Cannot read file: $goldenPath");
+        }
+
+        $golden = json_decode($content, true);
+
+        $goldenMessages = array_map(
+            fn (array $g) =>
+            sprintf(
+                'publiccode.yml:%d:%d: %s: %s%s',
+                $g['line'],
+                $g['column'],
+                $g['type'],
+                $g['key'] !== '' ? $g['key'] . ': ' : '',
+                $g['description'],
+            ),
+            array_filter($golden, fn (array $g) => $g['type'] === 'warning'),
+        );
+
+        sort($goldenMessages);
+        sort($warnings);
+
+        $this->assertSame(
+            $goldenMessages,
+            $warnings,
             "Mismatch between golden file and PHP binding for $goldenPath",
         );
     }

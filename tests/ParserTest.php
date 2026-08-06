@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Bfabio\PublicCodeParser\Tests;
 
 use Bfabio\PublicCodeParser\Parser;
+use Bfabio\PublicCodeParser\ParserConfig;
 use Bfabio\PublicCodeParser\PublicCodeV0;
 use PHPUnit\Framework\TestCase;
 
@@ -79,5 +80,24 @@ class ParserTest extends TestCase
 
         $decoded = json_decode($json, true);
         $this->assertEquals('Medusa', $decoded['name']);
+    }
+
+    public function testWarnings(): void
+    {
+        $config = new ParserConfig();
+        $config->setDisableNetwork(true);
+        $parser = new Parser($config);
+
+        $publicCode = $parser->parseFile(
+            __DIR__ . '/fixtures/testdata/v0/valid_with_warnings/unicode_grapheme_clusters.yml',
+        );
+
+        $this->assertSame(
+            [
+                'publiccode.yml:23:5: warning: description.en.genericName: ' .
+                "This key is DEPRECATED and will be removed in the future. It's safe to drop it",
+            ],
+            $publicCode->getWarnings(),
+        );
     }
 }

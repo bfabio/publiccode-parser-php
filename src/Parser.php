@@ -230,6 +230,15 @@ class Parser
      */
     private function processResult($result): PublicCodeV0
     {
+        /** @var list<string> */
+        $warnings = [];
+
+        if ($result->Warnings !== null) {
+            for ($i = 0; $i < $result->WarningCount; $i++) {
+                $warnings[] = FFI::string($result->Warnings[$i]);
+            }
+        }
+
         if ($result->ErrorCount > 0) {
             /** @var list<non-empty-string> */
             $errors = [];
@@ -271,6 +280,6 @@ class Parser
             throw new ParserException('Failed to decode JSON data: ' . json_last_error_msg());
         }
 
-        return new PublicCodeV0($data);
+        return new PublicCodeV0($data, $warnings);
     }
 }

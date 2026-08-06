@@ -9,10 +9,16 @@ use JsonSerializable;
 class PublicCodeV0 implements JsonSerializable
 {
     private array $data;
+    /** @var list<string> */
+    private array $warnings;
 
-    public function __construct(array $data)
+    /**
+     * @param list<string> $warnings
+     */
+    public function __construct(array $data, array $warnings = [])
     {
         $this->data = $data;
+        $this->warnings = $warnings;
     }
 
     public function getPubliccodeYmlVersion(): string
@@ -142,6 +148,12 @@ class PublicCodeV0 implements JsonSerializable
     public function getSoftwareType(): string
     {
         return $this->data['softwareType'];
+    }
+
+    /** @return list<string> */
+    public function getWarnings(): array
+    {
+        return $this->warnings;
     }
 
     public function get(string $key, $default = null)
