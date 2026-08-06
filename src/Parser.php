@@ -230,29 +230,27 @@ class Parser
      */
     private function processResult($result): PublicCodeV0
     {
-        /** @var list<string> */
-        $warnings = [];
-
-        if ($result->Warnings !== null) {
-            for ($i = 0; $i < $result->WarningCount; $i++) {
-                $warnings[] = FFI::string($result->Warnings[$i]);
-            }
-        }
+        [$warnings, $validationWarnings] = $this->parseValidationWarnings(
+            $result->Warnings,
+            $result->WarningCount,
+        );
 
         if ($result->ErrorCount > 0) {
-            /** @var list<non-empty-string> */
-            $errors = [];
-
-            if ($result->Errors !== null) {
-                for ($i = 0; $i < $result->ErrorCount; $i++) {
-                    $errors[] = FFI::string($result->Errors[$i]);
-                }
-            }
+            [$errors, $validationErrors] = $this->parseValidationErrors(
+                $result->Errors,
+                $result->ErrorCount,
+            );
 
             /** @phpstan-ignore-next-line */
             $this->ffi->FreeResult($result);
 
-            throw new ValidationException(implode("\n", $errors), $errors);
+            throw new ValidationException(
+                message: implode("\n", $errors),
+                errors: $errors,
+                validationErrors: $validationErrors,
+                warnings: $warnings,
+                validationWarnings: $validationWarnings,
+            );
         }
 
         if ($result->Error !== null) {
@@ -280,6 +278,68 @@ class Parser
             throw new ParserException('Failed to decode JSON data: ' . json_last_error_msg());
         }
 
-        return new PublicCodeV0($data, $warnings);
+        return new PublicCodeV0($data, $warnings, $validationWarnings);
+    }
+
+    /**
+     * @param mixed $cArray FFI pointer to char** (may be null)
+     * @return array{list<string>, list<ValidationError>}
+     */
+    private function parseValidationErrors($cArray, int $count): array
+    {
+        $messages = [];
+        $errors = [];
+
+        if ($cArray === null || $count === 0) {
+            return [$messages, $errors];
+        }
+
+        for ($i = 0; $i < $count; $i++) {
+            $payload = FFI::string($cArray[$i]);
+            $data = json_decode($payload, true);
+
+            if (is_array($data)) {
+                $error = ValidationError::fromArray($data);
+                $messages[] = (string) $error;
+            } else {
+                $error = ValidationError::fromString($payload);
+                $messages[] = $payload;
+            }
+
+            $errors[] = $error;
+        }
+
+        return [$messages, $errors];
+    }
+
+    /**
+     * @param mixed $cArray FFI pointer to char** (may be null)
+     * @return array{list<string>, list<ValidationWarning>}
+     */
+    private function parseValidationWarnings($cArray, int $count): array
+    {
+        $messages = [];
+        $warnings = [];
+
+        if ($cArray === null || $count === 0) {
+            return [$messages, $warnings];
+        }
+
+        for ($i = 0; $i < $count; $i++) {
+            $payload = FFI::string($cArray[$i]);
+            $data = json_decode($payload, true);
+
+            if (is_array($data)) {
+                $warning = ValidationWarning::fromArray($data);
+                $messages[] = (string) $warning;
+            } else {
+                $warning = ValidationWarning::fromString($payload);
+                $messages[] = $payload;
+            }
+
+            $warnings[] = $warning;
+        }
+
+        return [$messages, $warnings];
     }
 }

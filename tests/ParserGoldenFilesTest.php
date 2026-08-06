@@ -14,6 +14,8 @@ namespace Bfabio\PublicCodeParser\Tests;
 use Bfabio\PublicCodeParser\Exception\ValidationException;
 use Bfabio\PublicCodeParser\Parser;
 use Bfabio\PublicCodeParser\ParserConfig;
+use Bfabio\PublicCodeParser\ValidationError;
+use Bfabio\PublicCodeParser\ValidationWarning;
 use PHPUnit\Framework\TestCase;
 
 final class ParserGoldenFilesTest extends TestCase
@@ -44,7 +46,11 @@ final class ParserGoldenFilesTest extends TestCase
 
         $publicCode = $this->parser->parseFile($yamlPath);
 
-        $this->assertWarningsMatchGolden($publicCode->getWarnings(), $goldenPath);
+        $this->assertValidationResultsMatchGolden(
+            $publicCode->getWarnings(),
+            $publicCode->getValidationWarnings(),
+            $goldenPath,
+        );
     }
 
     /** @dataProvider validFilesWithWarningsNoNetworkProvider */
@@ -54,7 +60,11 @@ final class ParserGoldenFilesTest extends TestCase
 
         $publicCode = $this->parserNoNetwork->parseFile($yamlPath);
 
-        $this->assertWarningsMatchGolden($publicCode->getWarnings(), $goldenPath);
+        $this->assertValidationResultsMatchGolden(
+            $publicCode->getWarnings(),
+            $publicCode->getValidationWarnings(),
+            $goldenPath,
+        );
     }
 
     /** @dataProvider invalidFilesProvider */
@@ -67,7 +77,11 @@ final class ParserGoldenFilesTest extends TestCase
 
             $this->fail('Expected ValidationException was not thrown');
         } catch (ValidationException $e) {
-            $this->assertErrorsMatchGolden($e, $goldenPath);
+            $this->assertValidationResultsMatchGolden(
+                array_merge($e->getErrors(), $e->getWarnings()),
+                array_merge($e->getValidationErrors(), $e->getValidationWarnings()),
+                $goldenPath,
+            );
         }
     }
 
@@ -81,7 +95,11 @@ final class ParserGoldenFilesTest extends TestCase
 
             $this->fail('Expected ValidationException was not thrown');
         } catch (ValidationException $e) {
-            $this->assertErrorsMatchGolden($e, $goldenPath);
+            $this->assertValidationResultsMatchGolden(
+                array_merge($e->getErrors(), $e->getWarnings()),
+                array_merge($e->getValidationErrors(), $e->getValidationWarnings()),
+                $goldenPath,
+            );
         }
     }
 
@@ -166,8 +184,13 @@ final class ParserGoldenFilesTest extends TestCase
         return $outFile;
     }
 
-    private function assertErrorsMatchGolden(
-        ValidationException $e,
+    /**
+     * @param list<string> $messages
+     * @param list<ValidationError|ValidationWarning> $validationResults
+     */
+    private function assertValidationResultsMatchGolden(
+        array $messages,
+        array $validationResults,
         string $goldenPath,
     ): void {
         $content = file_get_contents($goldenPath);
@@ -187,50 +210,65 @@ final class ParserGoldenFilesTest extends TestCase
                 $g['key'] !== '' ? $g['key'] . ': ' : '',
                 $g['description'],
             ),
-            array_filter($golden, fn (array $g) => $g['type'] === 'error'),
+            $golden,
         );
-        $phpErrors = $e->getErrors();
+        $goldenValidationResults = $this->normalizeGoldenResults($golden);
+        $phpValidationResults = $this->normalizeValidationResults($validationResults);
 
         sort($goldenMessages);
-        sort($phpErrors);
+        sort($messages);
 
         $this->assertSame(
             $goldenMessages,
-            $phpErrors,
+            $messages,
             "Mismatch between golden file and PHP binding for $goldenPath",
+        );
+        $this->assertSame(
+            $goldenValidationResults,
+            $phpValidationResults,
+            "Mismatch between structured validation results and golden file for $goldenPath",
         );
     }
 
-    /** @param list<string> $warnings */
-    private function assertWarningsMatchGolden(array $warnings, string $goldenPath): void
+    /**
+     * @param list<array<string, mixed>> $golden
+     * @return list<array{string, int, int, string, string}>
+     */
+    private function normalizeGoldenResults(array $golden): array
     {
-        $content = file_get_contents($goldenPath);
-        if ($content === false) {
-            throw new \RuntimeException("Cannot read file: $goldenPath");
-        }
-
-        $golden = json_decode($content, true);
-
-        $goldenMessages = array_map(
-            fn (array $g) =>
-            sprintf(
-                'publiccode.yml:%d:%d: %s: %s%s',
-                $g['line'],
-                $g['column'],
-                $g['type'],
-                $g['key'] !== '' ? $g['key'] . ': ' : '',
-                $g['description'],
-            ),
-            array_filter($golden, fn (array $g) => $g['type'] === 'warning'),
+        $issues = array_map(
+            fn (array $issue) => [
+                (string) $issue['type'],
+                (int) $issue['line'],
+                (int) $issue['column'],
+                (string) $issue['key'],
+                (string) $issue['description'],
+            ],
+            $golden,
         );
+        sort($issues);
 
-        sort($goldenMessages);
-        sort($warnings);
+        return $issues;
+    }
 
-        $this->assertSame(
-            $goldenMessages,
-            $warnings,
-            "Mismatch between golden file and PHP binding for $goldenPath",
+    /**
+     * @param list<ValidationError|ValidationWarning> $issues
+     * @return list<array{string, int, int, string, string}>
+     */
+    private function normalizeValidationResults(array $issues): array
+    {
+        $normalized = array_map(
+            fn (ValidationError | ValidationWarning $issue) => [
+                $issue->getType(),
+                $issue->getLine(),
+                $issue->getColumn(),
+                $issue->getKey(),
+                $issue->getDescription(),
+            ],
+            $issues,
         );
+        sort($normalized);
+
+        return $normalized;
     }
 }

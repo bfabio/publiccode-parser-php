@@ -60,12 +60,22 @@ try {
     foreach ($publicCode->getWarnings() as $warning) {
         echo "- " . $warning . "\n";
     }
+
+    // Structured warnings include type, line, column, key and description.
+    foreach ($publicCode->getValidationWarnings() as $warning) {
+        echo $warning->getLine() . ': ' . $warning->getDescription() . "\n";
+    }
 } catch (ValidationException $e) {
     echo "publiccode.yml file is NOT valid: " . $e->getMessage() . "\n";
 
     // Get detailed validation errors
     foreach ($e->getErrors() as $error) {
         echo "- " . $error . "\n";
+    }
+
+    // getErrors() remains available for backwards compatibility.
+    foreach ($e->getValidationErrors() as $error) {
+        echo $error->getLine() . ': ' . $error->getDescription() . "\n";
     }
 } catch (ParserException $e) {
     echo "publiccode.yml file is NOT valid: " . $e->getMessage() . "\n";

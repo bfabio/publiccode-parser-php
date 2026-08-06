@@ -11,14 +11,18 @@ class PublicCodeV0 implements JsonSerializable
     private array $data;
     /** @var list<string> */
     private array $warnings;
+    /** @var list<ValidationWarning> */
+    private array $validationWarnings;
 
     /**
      * @param list<string> $warnings
+     * @param list<ValidationWarning> $validationWarnings
      */
-    public function __construct(array $data, array $warnings = [])
+    public function __construct(array $data, array $warnings = [], array $validationWarnings = [])
     {
         $this->data = $data;
         $this->warnings = $warnings;
+        $this->validationWarnings = $validationWarnings;
     }
 
     public function getPubliccodeYmlVersion(): string
@@ -154,6 +158,12 @@ class PublicCodeV0 implements JsonSerializable
     public function getWarnings(): array
     {
         return $this->warnings;
+    }
+
+    /** @return list<ValidationWarning> */
+    public function getValidationWarnings(): array
+    {
+        return $this->validationWarnings;
     }
 
     public function get(string $key, $default = null)
