@@ -33,7 +33,7 @@ import (
 	"time"
 	"unsafe"
 
-	"github.com/italia/publiccode-parser-go/v5"
+	"github.com/publiccodeyml/libpubliccode/v5"
 )
 
 //export NewParser
