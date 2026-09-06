@@ -2,7 +2,7 @@ module publiccode-parser-wrapper
 
 go 1.25.0
 
-require github.com/italia/publiccode-parser-go/v5 v5.4.3
+require github.com/publiccodeyml/libpubliccode/v5 v5.5.0
 
 require (
 	github.com/alranel/go-vcsurl/v2 v2.1.1 // indirect

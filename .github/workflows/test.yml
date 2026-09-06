@@ -56,16 +56,16 @@ jobs:
         run: |
           mkdir -p "$GITHUB_WORKSPACE/bin"
           go build -C go-src -o "$GITHUB_WORKSPACE/bin/publiccode-parser" \
-            github.com/italia/publiccode-parser-go/v5/publiccode-parser
+            github.com/publiccodeyml/libpubliccode/v5/publiccode-parser
 
       - name: Add bin to PATH
         run: echo "$GITHUB_WORKSPACE/bin" >> $GITHUB_PATH
 
       - name: Download test fixtures
         run: |
-          VERSION=$(go list -C go-src -m -f '{{.Version}}' github.com/italia/publiccode-parser-go/v5)
-          git clone --depth 1 --branch $VERSION https://github.com/italia/publiccode-parser-go.git /tmp/publiccode-parser-go
-          mv /tmp/publiccode-parser-go/testdata/* tests/fixtures/testdata/
+          VERSION=$(go list -C go-src -m -f '{{.Version}}' github.com/publiccodeyml/libpubliccode/v5)
+          git clone --depth 1 --branch $VERSION https://github.com/publiccodeyml/libpubliccode.git /tmp/libpubliccode
+          mv /tmp/libpubliccode/testdata/* tests/fixtures/testdata/
 
       - name: Run tests
         run: composer run test

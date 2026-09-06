@@ -1,6 +1,6 @@
 # PHP publiccode.yml parser
 
-PHP bindings for the [publiccode-parser-go](https://github.com/italia/publiccode-parser-go) library. Parse and validate `publiccode.yml` files in your PHP projects.
+PHP bindings for the [libpubliccode](https://github.com/publiccodeyml/libpubliccode) library. Parse and validate `publiccode.yml` files in your PHP projects.
 
 ## Installation
 
