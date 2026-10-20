@@ -177,7 +177,9 @@ final class ParserGoldenFilesTest extends TestCase
 
         exec($cmd, $output, $exitCode);
 
-        if ($exitCode !== 0) {
+        // Exit code 1 means the file has validation errors, the JSON
+        // output is still complete.
+        if ($exitCode !== 0 && $exitCode !== 1) {
             throw new \RuntimeException("publiccode-parser failed on $yamlPath (exit $exitCode)");
         }
 
